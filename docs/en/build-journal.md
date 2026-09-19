@@ -233,14 +233,9 @@ The sharp idea here: the sandbox attacks include the guard's own targets — `os
 
 Every module has a `__main__` self-check, and they all pass offline together with the red-team suite and both generators' byte checks. With a Gemini key in `.env`, the whole thing then ran for real on `gemini-3.8-flash`: **8 tasks out of 8 solved**, four tools written from scratch, and not a single repair needed.
 
-The number that matters is the reuse:
+The reuse was striking: `gstin_2` answered with 197 output tokens against `gstin_1`'s 1,734 — about a ninth.
 
-| | rounds | output tokens | tools written |
-|---|---|---|---|
-| `gstin_1` | 4 | 1,734 | 1 |
-| `gstin_2` | 3 | **197** | 0 — it called the one already there |
-
-**1/9 of the tokens.** The second task never pays for reasoning about the rule, writing the code, or having it checked; it pays for the calls and the answer. The tutorial promised a fifth.
+**And that number was the first thing the next step took away.** One pair is one sample. Repeating the same pair ten times put the saving far closer to a half for that family, with a wide spread between repetitions. The headline moved from "1/9" to a mean and a range, and the README now generates it from the run files rather than quoting a lucky pair. The lesson is the same one the postscript below repeats, learned twice in one day: **a single run of a stochastic system is an anecdote, however good it looks.**
 
 Two behaviours emerged that nobody asked for. Before trusting an existing tool, the model re-computed the contract's own worked example with it (`22AAAAA0000A1Z → C`, `07AABCS1429B1Z → W`) and only then used it on the real inputs. And `sessions_2` — running on Nasdaq Stockholm — reused the tool written during the *NYSE* task, passing Stockholm's holiday list as an argument, getting all six dates right. That is the design constraint paying off: a tool that had hard-coded the US holidays would have failed all six, and the held-out batch carrying the Stockholm list refuses such a tool at registration.
 

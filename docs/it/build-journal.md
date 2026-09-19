@@ -233,14 +233,9 @@ L'idea acuta qui: gli attacchi al sandbox includono i bersagli della guardia —
 
 Ogni modulo ha un'autoverifica `__main__`, e passano tutte offline insieme alla suite di red-team e ai controlli byte dei due generatori. Con una chiave Gemini in `.env`, il tutto è poi girato davvero su `gemini-3.8-flash`: **8 compiti su 8 risolti**, quattro strumenti scritti da zero, e nemmeno una riparazione necessaria.
 
-Il numero che conta è il riuso:
+Il riuso colpiva: `gstin_2` ha risposto con 197 token in uscita contro i 1.734 di `gstin_1` — circa un nono.
 
-| | round | token in uscita | strumenti scritti |
-|---|---|---|---|
-| `gstin_1` | 4 | 1.734 | 1 |
-| `gstin_2` | 3 | **197** | 0 — ha chiamato quello che c'era già |
-
-**1/9 dei token.** Il secondo compito non paga mai il ragionamento sulla regola, la scrittura del codice, né la sua verifica; paga le chiamate e la risposta. Il tutorial prometteva un quinto.
+**Ed è stato il primo numero che il passo successivo ha portato via.** Una coppia è un campione. Ripetendo la stessa coppia dieci volte, il risparmio per quella famiglia si è avvicinato molto di più alla metà, con una dispersione ampia fra le ripetizioni. Il titolo è passato da "1/9" a una media con un intervallo, e il README ora lo genera dai file delle esecuzioni invece di citare una coppia fortunata. La lezione è la stessa del poscritto qui sotto, imparata due volte nello stesso giorno: **una singola esecuzione di un sistema stocastico è un aneddoto, per quanto bello sembri.**
 
 Sono emersi due comportamenti che nessuno aveva chiesto. Prima di fidarsi di uno strumento esistente, il modello ha ricalcolato con esso l'esempio svolto del contratto (`22AAAAA0000A1Z → C`, `07AABCS1429B1Z → W`) e solo dopo l'ha usato sugli input veri. E `sessions_2` — che gira su Nasdaq Stoccolma — ha riusato lo strumento scritto durante il task *NYSE*, passandogli l'elenco delle festività svedesi come argomento, azzeccando tutte e sei le date. È il vincolo di progetto che rende: uno strumento con le festività americane scritte dentro avrebbe sbagliato tutte e sei, e il batch nascosto che porta l'elenco di Stoccolma rifiuta un tool simile già alla registrazione.
 

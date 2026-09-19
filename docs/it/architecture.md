@@ -98,20 +98,21 @@ Dove vive ciascuna metà:
  audit hook nega: chiamate a SO/processi/rete, scritture su file, letture fuori dalla stdlib
 ```
 
-## 3b. Perché conviene: la storia del riuso, misurata
+## 3b. Perché conviene: la storia del riuso
 
 ```
  run gstin_1   nessuno strumento va bene -> write_tool -> controlli superati
                -> lo chiama -> invia "KXMS"
-               4 round, 1.734 token in uscita, 1 strumento scritto
+               la corsa paga il ragionamento sulla regola, la scrittura del
+               codice, la sua verifica, e solo alla fine le chiamate
 
  run gstin_2   lo strumento è già nell'array -> lo chiama -> invia "HXOW"
-               3 round,   197 token in uscita, 0 strumenti scritti  <- 1/9 dei token
+               la corsa paga le chiamate e la risposta
 ```
 
-Misurato su `gemini-3.8-flash`. Il risparmio non è una differenza di arrotondamento: il
-secondo compito non paga mai il ragionamento sulla regola, la scrittura del codice, né la
-sua verifica. Paga solo le chiamate e la risposta.
+Quanto valga varia da corsa a corsa e da famiglia a famiglia, quindi è misurato invece
+che affermato: vedi la tabella del riuso nel [README](../../README.it.md#riuso-quanto-costa-il-secondo-compito-di-una-famiglia),
+che `src/report.py` rigenera dalle esecuzioni ripetute in `results/`.
 
 ## 4. I due livelli di sicurezza
 

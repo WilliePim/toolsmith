@@ -98,19 +98,20 @@ Where each half lives:
  audit hook denies: OS/process/network calls, file writes, reads outside the stdlib
 ```
 
-## 3b. Why it pays off: the reuse story, measured
+## 3b. Why it pays off: the reuse story
 
 ```
  run gstin_1   no tool fits -> write_tool -> checks pass -> call it -> submit "KXMS"
-               4 rounds, 1,734 output tokens, 1 tool written
+               the run pays for reasoning about the rule, writing the code,
+               having it checked, and only then the calls
 
  run gstin_2   the tool is already in the tools array -> call it -> submit "HXOW"
-               3 rounds,   197 output tokens, 0 tools written   <- 1/9 of the tokens
+               the run pays for the calls and the answer
 ```
 
-Measured on `gemini-3.8-flash`. The saving is not a rounding difference: the second
-task never pays for reasoning about the rule, writing code, or having it checked. It
-pays only for the calls and the answer.
+How much that is worth varies per run and per family, so it is measured rather than
+asserted: see the reuse table in the [README](../../README.md#reuse-what-the-second-task-of-a-family-costs),
+which `src/report.py` regenerates from the repeated runs in `results/`.
 
 ## 4. The two security layers
 

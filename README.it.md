@@ -2,16 +2,29 @@
 
 *Italiano · [English](README.md)*
 
-Un agente che parte con due strumenti — una calcolatrice e la data di oggi — e **ne scrive un terzo quando incontra un compito che i primi due non risolvono**. Lo strumento che scrive è un normale file Python su disco; il compito successivo dello stesso tipo lo richiama invece di riscriverlo, e in una esecuzione misurata è costato **1/9 dei token**.
+Un agente che parte con due strumenti — una calcolatrice e la data di oggi — e **ne scrive un terzo quando incontra un compito che i primi due non risolvono**. Lo strumento che scrive è un normale file Python su disco; il compito successivo dello stesso tipo lo richiama invece di riscriverlo.
 
-Non è "genera del codice ed eseguilo". Uno strumento scritto dal modello attraversa quattro cancelli prima di poter essere chiamato:
+Uno strumento scritto dal modello attraversa quattro cancelli prima di poter essere chiamato:
 
 1. una **guardia statica** legge il sorgente e lo rifiuta con una motivazione, oppure lo lascia passare;
 2. un **sandbox** lo esegue in un sottoprocesso blindato, contro i test del modello *e* contro input che non ha mai visto;
 3. un **registro** salva lo strumento che passa come `generated/<nome>.py`;
-4. lo strumento salvato entra nella lista degli strumenti del modello **già al round successivo**, a metà conversazione.
+4. lo strumento salvato entra nella lista degli strumenti **già al round successivo**, a metà conversazione.
 
-Il progetto è ricostruito da zero a partire dal tutorial *"Build an Agent That Writes Its Own Tools"*, la cui seconda metà era dietro un paywall. I moduli mancanti sono stati progettati dal diagramma dell'architettura e dai vincoli dichiarati, poi provati con una suite di red-team. La dipendenza da Groq del tutorial è sostituita da un livello neutrale con adattatori **Gemini** e **Claude**.
+> ### Cos'è, e cosa non è
+>
+> Questa è la **dimostrazione di un meccanismo, non un benchmark.** Esegue 8 compiti
+> in 4 famiglie. Basta a mostrare che il ciclo, la guardia, il sandbox e il riuso
+> funzionano, ed è ben lontano dal permettere un'affermazione generale su agenti,
+> modelli o tipi di compito. I numeri qui sotto vengono da esecuzioni ripetute di
+> quegli 8 compiti soltanto.
+>
+> Ogni cifra in questo file è generata da `src/report.py` a partire dai file in
+> `results/`. Nessuna è scritta a mano. Si riproducono con un comando:
+> `uv run python -m src.bench --repeats 10 && uv run python -m src.report`.
+
+<!-- GENERATED:bench-header:START -->
+<!-- GENERATED:bench-header:END -->
 
 ## Che aspetto ha
 
@@ -26,50 +39,69 @@ $ uv run python -m src.main run gstin_1
   r4 submit_answer -> 'KXMS' correct
 ```
 
-## Una esecuzione misurata
+## Scrivere strumenti conviene davvero?
 
-Tutti e otto i compiti, `gemini-3.8-flash`, una sola passata, nessuna riparazione
-necessaria. Il compito `_2` di ogni famiglia non scrive nulla: chiama lo strumento
-che il compito `_1` ha lasciato.
+Il modo onesto di rispondere è eseguire gli stessi compiti molte volte, in due
+condizioni, e riportare la dispersione invece di una corsa fortunata.
 
-| compito | risposta | ok | round | token in | token out | scritto | chiamate |
-|---|---|---|---|---|---|---|---|
-| gstin_1 | KXMS | OK | 4 | 8.559 | **1.734** | `gstin_check_char` | 4 |
-| gstin_2 | HXOW | OK | 3 | 3.569 | **197** | – (riusato) | 6 |
-| isoweek_1 | 2027-W31-6,… | OK | 3 | 4.031 | 352 | `iso_week_label` | 4 |
-| isoweek_2 | 2019-W19-2,… | OK | 3 | 4.048 | 644 | – (riusato) | 5 |
-| isin_1 | 071522 | OK | 3 | 5.459 | 859 | `isin_check_digit` | 6 |
-| isin_2 | 051817 | OK | 8 | 13.765 | 1.029 | – (riusato) | 7 |
-| sessions_1 | 2025-02-12,… | OK | 3 | 6.795 | 1.654 | `nth_trading_session` | 6 |
-| sessions_2 | 2025-02-20,… | OK | 3 | 6.797 | 1.214 | – (riusato) | 6 |
+**Con strumenti** l'agente può scrivere, registrare e chiamare strumenti. **Baseline** è
+lo stesso modello, gli stessi compiti e lo stesso prompt *meno le righe sulla scrittura
+degli strumenti*: un prompt che descrivesse uno strumento che quella condizione non può
+usare la penalizzerebbe, invece di misurarla.
 
-Due cose in quella tabella sono tutto il senso del progetto:
+<!-- GENERATED:prompt-diff:START -->
+<!-- GENERATED:prompt-diff:END -->
 
-- **Il riuso paga: 1/9 dei token.** `gstin_2` ha risposto con **197** token in uscita
-  contro i **1.734** di `gstin_1`, perché lo strumento esisteva già. Stessa famiglia,
-  stessa regola, stessa risposta corretta — l'unica differenza è che il secondo compito
-  aveva uno strumento da chiamare.
-- **Il riuso è reale, non una copia.** `sessions_2` gira su Nasdaq Stoccolma, ma chiama
-  lo strumento scritto per *NYSE*, passandogli l'elenco delle festività svedesi come
-  argomento. Uno strumento che si fosse scritto dentro le festività americane avrebbe
-  sbagliato tutte e sei le date; il controllo nascosto rifiuta quel tool già alla
-  registrazione.
+### Accuratezza e costo, per condizione
 
-Lo strumento che ha scritto per quella famiglia, non modificato:
+<!-- GENERATED:bench-conditions:START -->
+<!-- GENERATED:bench-conditions:END -->
 
-```python
-import datetime
+### Riuso: quanto costa il secondo compito di una famiglia
 
-def run(start: str, n: int, closures: list) -> str:
-    cur = datetime.date.fromisoformat(start)
-    holidays = set(closures)
-    count = 0
-    while count < n:
-        cur += datetime.timedelta(days=1)
-        if cur.weekday() < 5 and cur.isoformat() not in holidays:
-            count += 1
-    return cur.isoformat()
+Ogni famiglia ha due compiti. Il primo deve scrivere lo strumento; il secondo può
+limitarsi a chiamarlo. Misurato per ogni ripetizione, poi riportato come media e
+intervallo — una coppia sola è un aneddoto.
+
+<!-- GENERATED:bench-reuse:START -->
+<!-- GENERATED:bench-reuse:END -->
+
+### Per compito
+
+<!-- GENERATED:bench-tasks:START -->
+<!-- GENERATED:bench-tasks:END -->
+
+## Dove sbaglia
+
+I fallimenti sono elencati, non nascosti e non rilanciati finché passano. Ogni
+esecuzione qui sotto è in `results/runs/` con il suo record completo.
+
+<!-- GENERATED:bench-failures:START -->
+<!-- GENERATED:bench-failures:END -->
+
+## Il sandbox, misurato
+
+`src/attacks.py` contiene strumenti ostili nelle categorie qui sotto; `src/redteam.py`
+esegue ciascuno e registra quale livello l'ha fermato. Gli attacchi diretti al runtime
+sono inviati **oltre la guardia di proposito**, per dimostrare che l'audit hook regge da
+solo. Non servono chiamate API, quindi chiunque può riprodurlo in pochi secondi:
+
+```bash
+uv run python -m src.redteam --json results/sandbox_$(uname -s).json
 ```
+
+Categorie coperte: lettura fuori dalla cartella permessa, scrittura su disco, accesso
+alla rete, avvio di processi, cicli infiniti, uso eccessivo di memoria, import di moduli
+vietati, fuga dall'interprete, e ingoiare la violazione del sandbox.
+
+<!-- GENERATED:sandbox:START -->
+<!-- GENERATED:sandbox:END -->
+
+**Un limite dichiarato, non corretto.** Su Windows una singola allocazione da 4 GB *non*
+viene contenuta: non esiste un tetto allo spazio di indirizzamento, e l'allocazione
+finisce ben prima del timeout del watchdog. Su Linux il sandbox imposta `RLIMIT_AS`, e
+lo stesso attacco viene rifiutato. Lo riportiamo invece di correggerlo in silenzio,
+perché una suite che nasconde le proprie mancanze non vale nulla.
 
 ## Avvio rapido
 
@@ -80,7 +112,7 @@ uv sync                              # installa le dipendenze bloccate
 cp .env.example .env                 # poi incolla una chiave Gemini in .env
 ```
 
-Una chiave API Gemini gratuita si ottiene da [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (senza carta di credito). Incollala in `.env` come `GEMINI_API_KEY=...`. Per usare Claude, imposta `PROVIDER=claude` e `ANTHROPIC_API_KEY=...` (a consumo, da [console.anthropic.com](https://console.anthropic.com); un abbonamento a Claude.ai non è accesso API).
+Una chiave API Gemini gratuita si ottiene da [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Incollala in `.env` come `GEMINI_API_KEY=...`. Per usare Claude, imposta `PROVIDER=claude` e `ANTHROPIC_API_KEY=...` (a consumo; un abbonamento a Claude.ai non è accesso API).
 
 ```bash
 uv run python -m src.main redteam            # prova i due livelli di sicurezza — senza chiave
@@ -92,11 +124,18 @@ uv run python -m src.main show gstin_check_char
 uv run python -m src.main reset              # svuota la cassetta degli attrezzi
 ```
 
-Aggiungi `--provider claude` a un `run` per cambiare modello per quel comando.
+Riprodurre le misure (consuma quota API, e riprende se viene interrotto):
+
+```bash
+uv run python -m src.bench --repeats 10      # ogni compito, entrambe le condizioni
+uv run python -m src.report                  # rigenera ogni tabella qui sopra
+```
 
 ## I compiti
 
-Due **set** di compiti, ciascuno con due **famiglie**, ogni famiglia con due compiti perché il secondo riusi lo strumento del primo. Le famiglie sono scelte per sollecitare ogni parte della macchina; vedi [docs/it/task-sets.md](docs/it/task-sets.md).
+Due **set** di compiti, ciascuno con due **famiglie**, ogni famiglia con due compiti
+perché il secondo riusi lo strumento del primo. Le famiglie sono scelte per sollecitare
+ogni parte della macchina; vedi [docs/it/task-sets.md](docs/it/task-sets.md).
 
 | Set | Famiglia | La regola | Il caso limite nascosto |
 |---|---|---|---|
@@ -107,20 +146,46 @@ Due **set** di compiti, ciascuno con due **famiglie**, ogni famiglia con due com
 
 Ogni file di compiti è generato da codice di riferimento (`src/taskgen.py`, `src/taskgen_finance.py`); le risposte finance sono verificate con `python-stdnum` ed `exchange-calendars`.
 
+## Cosa viene dal riferimento, e cosa è nuovo qui
+
+Il progetto segue un tutorial sulla costruzione di un agente che estende sé stesso, la
+cui seconda metà era dietro un paywall. *Riferimento: (segnaposto — da inserire).* Nulla
+di esso è riprodotto qui: né testo, né figure, né tabelle. Quella che segue è una
+descrizione con parole mie di quali idee venissero dalla metà leggibile, e quali siano
+state progettate per questo repository.
+
+**Dal riferimento (idee, reimplementate):** la forma generale — un agente la cui lista di
+strumenti viene ricostruita dentro il ciclo dei round; dividere la sicurezza in una
+lettura statica del sorgente e un'esecuzione in sandbox; verificare uno strumento
+generato contro input che il modello non può vedere; tenere gli strumenti come file
+semplici perché sopravvivano alla conversazione; e i due strumenti iniziali scelti per
+essere deliberatamente quasi-pertinenti. La famiglia GSTIN e il suo esempio svolto
+vengono dal riferimento; il file dei compiti qui è rigenerato da un'implementazione di
+riferimento, perché la risposta d'esempio del riferimento per un input nascosto non
+tornava.
+
+**Nuovo qui:** ogni modulo dopo la metà è stato progettato da zero — l'esecutore del
+sandbox e il suo watchdog, la guardia statica, il registro, il percorso
+scrivi-controlla-registra, i prompt, il ciclo dell'agente, il corpus di red-team e la
+CLI. Inoltre: un livello del modello neutrale con adattatori Gemini e Claude al posto del
+singolo provider del riferimento; un nonce per esecuzione perché uno strumento non possa
+falsificare i propri risultati; il precaricamento dei moduli perché l'audit hook non
+rompa gli import ordinari; la normalizzazione dei percorsi nella regola di apertura file;
+un'interfaccia degli strumenti per famiglia che permette al controllo nascosto di
+chiamare uno strumento con input nascosti; un secondo set di compiti verificato con
+librerie esterne; e l'intera impalcatura di misura da cui vengono i numeri di questo
+README.
+
 ## Com'è costruito
 
-Ogni modulo ha una autoverifica `__main__` eseguibile da sola (`uv run python -m src.<modulo>`). I livelli di sicurezza sono provati senza chiamate API:
-
-```bash
-uv run python -m src.redteam     # 36 attacchi contenuti, 7 strumenti benigni passano
-```
+Ogni modulo ha una autoverifica `__main__` eseguibile da sola (`uv run python -m src.<modulo>`).
 
 Per saperne di più:
 
-- [docs/it/build-journal.md](docs/it/build-journal.md) — ogni passo, perché è stato costruito così, e gli errori fatti lungo la strada (il punto migliore da cui partire).
-- [docs/it/architecture.md](docs/it/architecture.md) — il ciclo, i quattro cancelli, i due livelli di sicurezza, come diagrammi.
-- [docs/it/security.md](docs/it/security.md) — la guardia, il sandbox, cosa ciascuno vede e non vede, e i limiti noti.
-- [docs/it/task-sets.md](docs/it/task-sets.md) — perché queste famiglie, lo schema del file di compiti, come aggiungere un set.
+- [docs/it/build-journal.md](docs/it/build-journal.md) — ogni passo, perché è stato costruito così, e gli errori fatti lungo la strada.
+- [docs/it/architecture.md](docs/it/architecture.md) — il ciclo, i quattro cancelli, i due livelli di sicurezza.
+- [docs/it/security.md](docs/it/security.md) — la guardia, il sandbox, e i limiti noti.
+- [docs/it/task-sets.md](docs/it/task-sets.md) — perché queste famiglie, lo schema, come aggiungere un set.
 - [docs/it/design.md](docs/it/design.md) — le decisioni di progetto dietro la costruzione.
 
 ## Struttura
@@ -141,9 +206,21 @@ src/
   tasks.py, prompts.py  compiti tipizzati e ciò che viene detto al modello
   agent.py              il ciclo dei round e "la riga"
   attacks.py, redteam.py  la prova adversariale
+  bench.py, report.py   l'impalcatura di misura dietro ogni numero qui sopra
   main.py               la riga di comando
+results/
+  runs/                 un record JSON per esecuzione
+  toolboxes/            gli strumenti scritti da ogni ripetizione
+  prompts/              i system prompt esatti usati, entrambe le condizioni
+  summary.json          ciò che calcola report.py; la fonte di ogni tabella
 ```
 
 ## Nota di sicurezza
 
-Il sandbox nega accessi a sistema operativo, filesystem e rete tramite un audit hook di Python, ed esegue ogni strumento in un sottoprocesso isolato con un ambiente ripulito (nessuna chiave API), un timeout e un tetto sull'output. Su POSIX imposta anche limiti rigidi di CPU e memoria; su Windows la memoria è limitata solo dal timeout. È una barriera solida per una demo, non la pretesa di un isolamento perfetto — non puntarlo su input non fidati su una macchina che non puoi permetterti di perdere. Vedi [docs/it/security.md](docs/it/security.md).
+Il sandbox nega accessi a sistema operativo, filesystem e rete tramite un audit hook di
+Python, ed esegue ogni strumento in un sottoprocesso isolato con un ambiente ripulito
+(nessuna chiave API), un timeout e un tetto sull'output. Su POSIX imposta anche limiti
+rigidi di CPU e memoria; su Windows la memoria è limitata solo dal timeout — vedi il
+limite misurato qui sopra. È una barriera solida per una demo, non la pretesa di un
+isolamento perfetto. Non puntarlo su input non fidati su una macchina che non puoi
+permetterti di perdere. Vedi [docs/it/security.md](docs/it/security.md).

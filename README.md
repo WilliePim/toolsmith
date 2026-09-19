@@ -17,16 +17,55 @@ The project is a from-scratch build based on the tutorial *"Build an Agent That 
 
 ```
 $ uv run python -m src.main run gstin_1
-──────────────────────────── gstin_1  (GSTIN check character) ────────────────────────────
-  r1 write_tool 'gstin_check_char': registered
-  r2 gstin_check_char(prefix='16TEUYJ4263R1Z') -> 'K'
-  r2 gstin_check_char(prefix='14ELRKY8914Q4Z') -> 'X'
-  r2 gstin_check_char(prefix='03ZPVMA6122X3Z') -> 'M'
-  r2 gstin_check_char(prefix='07RJXDS8075B1Z') -> 'S'
-  r3 submit_answer -> 'KXMS' correct
+────────────────── gstin_1  (GSTIN check character) ──────────────────
+  r2 write_tool 'gstin_check_char': registered
+  r3 gstin_check_char(prefix='16TEUYJ4263R1Z') -> 'K'
+  r3 gstin_check_char(prefix='14ELRKY8914Q4Z') -> 'X'
+  r3 gstin_check_char(prefix='03ZPVMA6122X3Z') -> 'M'
+  r3 gstin_check_char(prefix='07RJXDS8075B1Z') -> 'S'
+  r4 submit_answer -> 'KXMS' correct
 ```
 
-Run `gstin_2` next and it calls the tool it already has, for a fraction of the tokens.
+## A measured run
+
+All eight tasks, `gemini-3.8-flash`, one pass, no repairs needed. The `_2` task of
+each family writes nothing — it calls the tool the `_1` task left behind.
+
+| task | answer | ok | rounds | tokens in | tokens out | wrote | calls |
+|---|---|---|---|---|---|---|---|
+| gstin_1 | KXMS | OK | 4 | 8,559 | **1,734** | `gstin_check_char` | 4 |
+| gstin_2 | HXOW | OK | 3 | 3,569 | **197** | – (reused) | 6 |
+| isoweek_1 | 2027-W31-6,… | OK | 3 | 4,031 | 352 | `iso_week_label` | 4 |
+| isoweek_2 | 2019-W19-2,… | OK | 3 | 4,048 | 644 | – (reused) | 5 |
+| isin_1 | 071522 | OK | 3 | 5,459 | 859 | `isin_check_digit` | 6 |
+| isin_2 | 051817 | OK | 8 | 13,765 | 1,029 | – (reused) | 7 |
+| sessions_1 | 2025-02-12,… | OK | 3 | 6,795 | 1,654 | `nth_trading_session` | 6 |
+| sessions_2 | 2025-02-20,… | OK | 3 | 6,797 | 1,214 | – (reused) | 6 |
+
+Two things in that table are the whole point:
+
+- **Reuse pays.** `gstin_2` answered with **197** output tokens against `gstin_1`'s
+  1,734 — about a ninth — because the tool already existed.
+- **Reuse is real, not a copy.** `sessions_2` runs on Nasdaq Stockholm, but calls the
+  tool written for *NYSE*, passing Stockholm's holiday list as an argument. A tool
+  that had hard-coded the US holidays would have got all six dates wrong; the
+  held-out check refuses that tool at registration.
+
+The tool it wrote for that family, unedited:
+
+```python
+import datetime
+
+def run(start: str, n: int, closures: list) -> str:
+    cur = datetime.date.fromisoformat(start)
+    holidays = set(closures)
+    count = 0
+    while count < n:
+        cur += datetime.timedelta(days=1)
+        if cur.weekday() < 5 and cur.isoformat() not in holidays:
+            count += 1
+    return cur.isoformat()
+```
 
 ## Quickstart
 

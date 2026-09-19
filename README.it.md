@@ -17,16 +17,57 @@ Il progetto è ricostruito da zero a partire dal tutorial *"Build an Agent That 
 
 ```
 $ uv run python -m src.main run gstin_1
-──────────────────────────── gstin_1  (GSTIN check character) ────────────────────────────
-  r1 write_tool 'gstin_check_char': registered
-  r2 gstin_check_char(prefix='16TEUYJ4263R1Z') -> 'K'
-  r2 gstin_check_char(prefix='14ELRKY8914Q4Z') -> 'X'
-  r2 gstin_check_char(prefix='03ZPVMA6122X3Z') -> 'M'
-  r2 gstin_check_char(prefix='07RJXDS8075B1Z') -> 'S'
-  r3 submit_answer -> 'KXMS' correct
+────────────────── gstin_1  (GSTIN check character) ──────────────────
+  r2 write_tool 'gstin_check_char': registered
+  r3 gstin_check_char(prefix='16TEUYJ4263R1Z') -> 'K'
+  r3 gstin_check_char(prefix='14ELRKY8914Q4Z') -> 'X'
+  r3 gstin_check_char(prefix='03ZPVMA6122X3Z') -> 'M'
+  r3 gstin_check_char(prefix='07RJXDS8075B1Z') -> 'S'
+  r4 submit_answer -> 'KXMS' correct
 ```
 
-Lanciando poi `gstin_2`, richiama lo strumento che ha già, con una frazione dei token.
+## Una esecuzione misurata
+
+Tutti e otto i compiti, `gemini-3.8-flash`, una sola passata, nessuna riparazione
+necessaria. Il compito `_2` di ogni famiglia non scrive nulla: chiama lo strumento
+che il compito `_1` ha lasciato.
+
+| compito | risposta | ok | round | token in | token out | scritto | chiamate |
+|---|---|---|---|---|---|---|---|
+| gstin_1 | KXMS | OK | 4 | 8.559 | **1.734** | `gstin_check_char` | 4 |
+| gstin_2 | HXOW | OK | 3 | 3.569 | **197** | – (riusato) | 6 |
+| isoweek_1 | 2027-W31-6,… | OK | 3 | 4.031 | 352 | `iso_week_label` | 4 |
+| isoweek_2 | 2019-W19-2,… | OK | 3 | 4.048 | 644 | – (riusato) | 5 |
+| isin_1 | 071522 | OK | 3 | 5.459 | 859 | `isin_check_digit` | 6 |
+| isin_2 | 051817 | OK | 8 | 13.765 | 1.029 | – (riusato) | 7 |
+| sessions_1 | 2025-02-12,… | OK | 3 | 6.795 | 1.654 | `nth_trading_session` | 6 |
+| sessions_2 | 2025-02-20,… | OK | 3 | 6.797 | 1.214 | – (riusato) | 6 |
+
+Due cose in quella tabella sono tutto il senso del progetto:
+
+- **Il riuso paga.** `gstin_2` ha risposto con **197** token in uscita contro i 1.734
+  di `gstin_1` — circa un nono — perché lo strumento esisteva già.
+- **Il riuso è reale, non una copia.** `sessions_2` gira su Nasdaq Stoccolma, ma chiama
+  lo strumento scritto per *NYSE*, passandogli l'elenco delle festività svedesi come
+  argomento. Uno strumento che si fosse scritto dentro le festività americane avrebbe
+  sbagliato tutte e sei le date; il controllo nascosto rifiuta quel tool già alla
+  registrazione.
+
+Lo strumento che ha scritto per quella famiglia, non modificato:
+
+```python
+import datetime
+
+def run(start: str, n: int, closures: list) -> str:
+    cur = datetime.date.fromisoformat(start)
+    holidays = set(closures)
+    count = 0
+    while count < n:
+        cur += datetime.timedelta(days=1)
+        if cur.weekday() < 5 and cur.isoformat() not in holidays:
+            count += 1
+    return cur.isoformat()
+```
 
 ## Avvio rapido
 

@@ -47,7 +47,10 @@ PROVIDER = _env("PROVIDER", "gemini").lower()
 
 MODEL_TIMEOUT_S = 120.0             # one model call, before it counts as failed
 
-GEMINI_MODEL = _env("GEMINI_MODEL", "gemini-3.6-flash")
+# The Flash tier is the sweet spot here: this workload needs correct code and
+# hand-derived test values, not depth. A weaker tier is a false economy, because
+# every rejected tool costs a whole extra round with the conversation resent.
+GEMINI_MODEL = _env("GEMINI_MODEL", "gemini-3.8-flash")
 GEMINI_THINKING_LEVEL = "low"
 GEMINI_MAX_OUTPUT_TOKENS = 8192     # thinking tokens count against this too
 GEMINI_REQUEST_SPACING_S = 4.0      # stays under a free-tier requests/minute cap

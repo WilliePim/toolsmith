@@ -2,7 +2,7 @@
 
 *[Italiano](README.it.md) · English*
 
-An agent that starts with two tools — a calculator and today's date — and **writes a third when it meets a task the first two cannot do**. The tool it writes is an ordinary Python file on disk; the next task of the same kind calls it instead of writing it again.
+An agent that starts with two tools — a calculator and today's date — and **writes a third when it meets a task the first two cannot do**. The tool it writes is an ordinary Python file on disk; the next task of the same kind calls it instead of writing it again, and in a measured run that cost **1/9 of the tokens**.
 
 This is not "generate some code and run it". A tool the model writes goes through four gates before it can be called:
 
@@ -44,8 +44,10 @@ each family writes nothing — it calls the tool the `_1` task left behind.
 
 Two things in that table are the whole point:
 
-- **Reuse pays.** `gstin_2` answered with **197** output tokens against `gstin_1`'s
-  1,734 — about a ninth — because the tool already existed.
+- **Reuse pays: 1/9 of the tokens.** `gstin_2` answered with **197** output tokens
+  against `gstin_1`'s **1,734**, because the tool already existed. Same family, same
+  rule, same correct answer — the only difference is that the second task had a tool
+  to call.
 - **Reuse is real, not a copy.** `sessions_2` runs on Nasdaq Stockholm, but calls the
   tool written for *NYSE*, passing Stockholm's holiday list as an argument. A tool
   that had hard-coded the US holidays would have got all six dates wrong; the

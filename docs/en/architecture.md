@@ -98,6 +98,20 @@ Where each half lives:
  audit hook denies: OS/process/network calls, file writes, reads outside the stdlib
 ```
 
+## 3b. Why it pays off: the reuse story, measured
+
+```
+ run gstin_1   no tool fits -> write_tool -> checks pass -> call it -> submit "KXMS"
+               4 rounds, 1,734 output tokens, 1 tool written
+
+ run gstin_2   the tool is already in the tools array -> call it -> submit "HXOW"
+               3 rounds,   197 output tokens, 0 tools written   <- 1/9 of the tokens
+```
+
+Measured on `gemini-3.8-flash`. The saving is not a rounding difference: the second
+task never pays for reasoning about the rule, writing code, or having it checked. It
+pays only for the calls and the answer.
+
 ## 4. The two security layers
 
 | | Static guard (`guard.py`) | Runtime sandbox (`sandbox.py`) |

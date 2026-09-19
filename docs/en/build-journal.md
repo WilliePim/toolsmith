@@ -229,9 +229,20 @@ The sharp idea here: the sandbox attacks include the guard's own targets — `os
 
 ---
 
-## What the self-checks cover, and what still needs a key
+## The live run
 
-Every module has a `__main__` self-check, and they all pass offline together with the red-team suite and both generators' byte checks. The one thing that needs a real API key is the *live* demo: `python -m src.main run ...` with a model actually solving a task. Paste a Gemini key into `.env` and it runs end to end.
+Every module has a `__main__` self-check, and they all pass offline together with the red-team suite and both generators' byte checks. With a Gemini key in `.env`, the whole thing then ran for real on `gemini-3.8-flash`: **8 tasks out of 8 solved**, four tools written from scratch, and not a single repair needed.
+
+The number that matters is the reuse:
+
+| | rounds | output tokens | tools written |
+|---|---|---|---|
+| `gstin_1` | 4 | 1,734 | 1 |
+| `gstin_2` | 3 | **197** | 0 — it called the one already there |
+
+**1/9 of the tokens.** The second task never pays for reasoning about the rule, writing the code, or having it checked; it pays for the calls and the answer. The tutorial promised a fifth.
+
+Two behaviours emerged that nobody asked for. Before trusting an existing tool, the model re-computed the contract's own worked example with it (`22AAAAA0000A1Z → C`, `07AABCS1429B1Z → W`) and only then used it on the real inputs. And `sessions_2` — running on Nasdaq Stockholm — reused the tool written during the *NYSE* task, passing Stockholm's holiday list as an argument, getting all six dates right. That is the design constraint paying off: a tool that had hard-coded the US holidays would have failed all six, and the held-out batch carrying the Stockholm list refuses such a tool at registration.
 
 ## A postscript: the run that corrected me
 

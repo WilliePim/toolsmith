@@ -2,7 +2,7 @@
 
 *Italiano · [English](README.md)*
 
-Un agente che parte con due strumenti — una calcolatrice e la data di oggi — e **ne scrive un terzo quando incontra un compito che i primi due non risolvono**. Lo strumento che scrive è un normale file Python su disco; il compito successivo dello stesso tipo lo richiama, invece di riscriverlo.
+Un agente che parte con due strumenti — una calcolatrice e la data di oggi — e **ne scrive un terzo quando incontra un compito che i primi due non risolvono**. Lo strumento che scrive è un normale file Python su disco; il compito successivo dello stesso tipo lo richiama invece di riscriverlo, e in una esecuzione misurata è costato **1/9 dei token**.
 
 Non è "genera del codice ed eseguilo". Uno strumento scritto dal modello attraversa quattro cancelli prima di poter essere chiamato:
 
@@ -45,8 +45,10 @@ che il compito `_1` ha lasciato.
 
 Due cose in quella tabella sono tutto il senso del progetto:
 
-- **Il riuso paga.** `gstin_2` ha risposto con **197** token in uscita contro i 1.734
-  di `gstin_1` — circa un nono — perché lo strumento esisteva già.
+- **Il riuso paga: 1/9 dei token.** `gstin_2` ha risposto con **197** token in uscita
+  contro i **1.734** di `gstin_1`, perché lo strumento esisteva già. Stessa famiglia,
+  stessa regola, stessa risposta corretta — l'unica differenza è che il secondo compito
+  aveva uno strumento da chiamare.
 - **Il riuso è reale, non una copia.** `sessions_2` gira su Nasdaq Stoccolma, ma chiama
   lo strumento scritto per *NYSE*, passandogli l'elenco delle festività svedesi come
   argomento. Uno strumento che si fosse scritto dentro le festività americane avrebbe

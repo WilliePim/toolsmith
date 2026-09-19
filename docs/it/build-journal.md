@@ -229,9 +229,20 @@ L'idea acuta qui: gli attacchi al sandbox includono i bersagli della guardia —
 
 ---
 
-## Cosa coprono le autoverifiche, e cosa serve ancora una chiave
+## L'esecuzione dal vivo
 
-Ogni modulo ha un'autoverifica `__main__`, e passano tutte offline insieme alla suite di red-team e ai controlli byte dei due generatori. L'unica cosa che serve una chiave API vera è la demo *dal vivo*: `python -m src.main run ...` con un modello che risolve davvero un compito. Incolla una chiave Gemini in `.env` e gira dall'inizio alla fine.
+Ogni modulo ha un'autoverifica `__main__`, e passano tutte offline insieme alla suite di red-team e ai controlli byte dei due generatori. Con una chiave Gemini in `.env`, il tutto è poi girato davvero su `gemini-3.8-flash`: **8 compiti su 8 risolti**, quattro strumenti scritti da zero, e nemmeno una riparazione necessaria.
+
+Il numero che conta è il riuso:
+
+| | round | token in uscita | strumenti scritti |
+|---|---|---|---|
+| `gstin_1` | 4 | 1.734 | 1 |
+| `gstin_2` | 3 | **197** | 0 — ha chiamato quello che c'era già |
+
+**1/9 dei token.** Il secondo compito non paga mai il ragionamento sulla regola, la scrittura del codice, né la sua verifica; paga le chiamate e la risposta. Il tutorial prometteva un quinto.
+
+Sono emersi due comportamenti che nessuno aveva chiesto. Prima di fidarsi di uno strumento esistente, il modello ha ricalcolato con esso l'esempio svolto del contratto (`22AAAAA0000A1Z → C`, `07AABCS1429B1Z → W`) e solo dopo l'ha usato sugli input veri. E `sessions_2` — che gira su Nasdaq Stoccolma — ha riusato lo strumento scritto durante il task *NYSE*, passandogli l'elenco delle festività svedesi come argomento, azzeccando tutte e sei le date. È il vincolo di progetto che rende: uno strumento con le festività americane scritte dentro avrebbe sbagliato tutte e sei, e il batch nascosto che porta l'elenco di Stoccolma rifiuta un tool simile già alla registrazione.
 
 ## Poscritto: l'esecuzione che mi ha corretto
 

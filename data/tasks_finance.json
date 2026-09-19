@@ -1,0 +1,725 @@
+{
+  "set": "finance",
+  "generated_by": "src/taskgen_finance.py",
+  "families": [
+    {
+      "family": "isin",
+      "label": "ISIN check digit",
+      "contract": "An ISIN is 12 characters: a two-letter country code, a nine-character body, and one check digit. To find the check digit, first turn the first 11 characters into digits: each letter becomes a two-digit number by its position in the alphabet (A=10, B=11, ... Z=35) and each digit stays as it is, giving one long string of digits. Then apply the Luhn rule to that string: reading from the rightmost digit to the left, double every second digit (the 1st, 3rd, 5th, ... counting from the right), and if a doubled value is more than 9 subtract 9 from it; sum all the resulting digits; the check digit is (10 - sum modulo 10) modulo 10. You are given the first 11 characters of several ISINs and must return each check digit. As a worked example, US037833100 gives \"5\".",
+      "returns": "the check digits in order, joined into one string with nothing between them",
+      "tool_params": {
+        "prefix": {
+          "type": "string",
+          "description": "the first 11 characters of an ISIN"
+        }
+      },
+      "tool_returns": "the check digit for that prefix, as a one-character string",
+      "joiner": "",
+      "holdout_hint": "some codes contain letters after the two-letter country prefix",
+      "tasks": [
+        {
+          "id": "isin_1",
+          "prompt": "An ISIN is 12 characters: a two-letter country code, a nine-character body, and one check digit. To find the check digit, first turn the first 11 characters into digits: each letter becomes a two-digit number by its position in the alphabet (A=10, B=11, ... Z=35) and each digit stays as it is, giving one long string of digits. Then apply the Luhn rule to that string: reading from the rightmost digit to the left, double every second digit (the 1st, 3rd, 5th, ... counting from the right), and if a doubled value is more than 9 subtract 9 from it; sum all the resulting digits; the check digit is (10 - sum modulo 10) modulo 10. You are given the first 11 characters of several ISINs and must return each check digit. As a worked example, US037833100 gives \"5\".\n\nWhat are the check digits for these ISIN prefixes: DE000716460, IT000312836, FR000012027, US594918104, IT000006207, GB000989529?\n\nAnswer with the check digits in order, joined into one string with nothing between them.",
+          "calls": [
+            {
+              "prefix": "DE000716460"
+            },
+            {
+              "prefix": "IT000312836"
+            },
+            {
+              "prefix": "FR000012027"
+            },
+            {
+              "prefix": "US594918104"
+            },
+            {
+              "prefix": "IT000006207"
+            },
+            {
+              "prefix": "GB000989529"
+            }
+          ],
+          "answer": "071522"
+        },
+        {
+          "id": "isin_2",
+          "prompt": "An ISIN is 12 characters: a two-letter country code, a nine-character body, and one check digit. To find the check digit, first turn the first 11 characters into digits: each letter becomes a two-digit number by its position in the alphabet (A=10, B=11, ... Z=35) and each digit stays as it is, giving one long string of digits. Then apply the Luhn rule to that string: reading from the rightmost digit to the left, double every second digit (the 1st, 3rd, 5th, ... counting from the right), and if a doubled value is more than 9 subtract 9 from it; sum all the resulting digits; the check digit is (10 - sum modulo 10) modulo 10. You are given the first 11 characters of several ISINs and must return each check digit. As a worked example, US037833100 gives \"5\".\n\nWhat are the check digits for these ISIN prefixes: CH003886335, NL001027321, JP363340000, IT000007261, DE000723610, US023135106?\n\nAnswer with the check digits in order, joined into one string with nothing between them.",
+          "calls": [
+            {
+              "prefix": "CH003886335"
+            },
+            {
+              "prefix": "NL001027321"
+            },
+            {
+              "prefix": "JP363340000"
+            },
+            {
+              "prefix": "IT000007261"
+            },
+            {
+              "prefix": "DE000723610"
+            },
+            {
+              "prefix": "US023135106"
+            }
+          ],
+          "answer": "051817"
+        }
+      ],
+      "holdout": [
+        {
+          "calls": [
+            {
+              "prefix": "US88160R101"
+            },
+            {
+              "prefix": "GB000237400"
+            },
+            {
+              "prefix": "US02079K305"
+            },
+            {
+              "prefix": "DE000519000"
+            },
+            {
+              "prefix": "NL00150001Q"
+            },
+            {
+              "prefix": "IT000385640"
+            }
+          ],
+          "expect": "469395"
+        },
+        {
+          "calls": [
+            {
+              "prefix": "US30303M102"
+            },
+            {
+              "prefix": "IE00B4L5Y98"
+            },
+            {
+              "prefix": "FR000012101"
+            },
+            {
+              "prefix": "US67066G104"
+            },
+            {
+              "prefix": "DE000840400"
+            },
+            {
+              "prefix": "IT000523936"
+            }
+          ],
+          "expect": "734050"
+        },
+        {
+          "calls": [
+            {
+              "prefix": "GB00BH4HKS3"
+            },
+            {
+              "prefix": "US92826C839"
+            },
+            {
+              "prefix": "IT000313247"
+            },
+            {
+              "prefix": "US46625H100"
+            },
+            {
+              "prefix": "FR000013110"
+            },
+            {
+              "prefix": "CH001203204"
+            }
+          ],
+          "expect": "946548"
+        }
+      ]
+    },
+    {
+      "family": "sessions",
+      "label": "trading session date",
+      "contract": "see each task (the holiday list differs by exchange)",
+      "returns": "the dates in order, separated by commas with no spaces",
+      "tool_params": {
+        "start": {
+          "type": "string",
+          "description": "the start date, YYYY-MM-DD"
+        },
+        "n": {
+          "type": "integer",
+          "description": "which session after the start"
+        },
+        "closures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "the market holidays, each YYYY-MM-DD"
+        }
+      },
+      "tool_returns": "the nth trading session date after the start, as YYYY-MM-DD",
+      "joiner": ",",
+      "holdout_hint": "some ranges contain a closure day",
+      "tasks": [
+        {
+          "id": "sessions_1",
+          "prompt": "A trading session is a weekday (Monday to Friday) that is not a market holiday. Half-day sessions count as full sessions. You are given a start date and a number n, and must return the date of the nth trading session strictly after the start date, in YYYY-MM-DD form; the start date itself is never counted. The NYSE market holidays for 2025 are exactly these, and this list is the only one you may use: 2025-01-01, 2025-01-09, 2025-01-20, 2025-02-17, 2025-04-18, 2025-05-26, 2025-06-19, 2025-07-04, 2025-09-01, 2025-11-27, 2025-12-25. As a worked example, starting from 2025-03-07 with n = 3 gives \"2025-03-12\" (that week has no holiday).\n\nFor each of these (start date, n) pairs give the nth trading session after the start: (2025-02-03, 7), (2025-05-02, 10), (2025-08-13, 4), (2025-10-10, 12), (2025-03-18, 6), (2025-09-15, 8).\n\nAnswer with the dates in order, separated by commas with no spaces.",
+          "calls": [
+            {
+              "start": "2025-02-03",
+              "n": 7,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-05-02",
+              "n": 10,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-08-13",
+              "n": 4,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-10-10",
+              "n": 12,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-03-18",
+              "n": 6,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-09-15",
+              "n": 8,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            }
+          ],
+          "answer": "2025-02-12,2025-05-16,2025-08-19,2025-10-28,2025-03-26,2025-09-25"
+        },
+        {
+          "id": "sessions_2",
+          "prompt": "A trading session is a weekday (Monday to Friday) that is not a market holiday. Half-day sessions count as full sessions. You are given a start date and a number n, and must return the date of the nth trading session strictly after the start date, in YYYY-MM-DD form; the start date itself is never counted. The Nasdaq Stockholm market holidays for 2025 are exactly these, and this list is the only one you may use: 2025-01-01, 2025-01-06, 2025-04-18, 2025-04-21, 2025-05-01, 2025-05-29, 2025-06-06, 2025-06-20, 2025-12-24, 2025-12-25, 2025-12-26, 2025-12-31. As a worked example, starting from 2025-03-07 with n = 3 gives \"2025-03-12\" (that week has no holiday).\n\nFor each of these (start date, n) pairs give the nth trading session after the start: (2025-02-10, 8), (2025-07-01, 5), (2025-08-29, 3), (2025-11-24, 5), (2025-01-13, 5), (2025-05-22, 3).\n\nAnswer with the dates in order, separated by commas with no spaces.",
+          "calls": [
+            {
+              "start": "2025-02-10",
+              "n": 8,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-07-01",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-08-29",
+              "n": 3,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-11-24",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-01-13",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-05-22",
+              "n": 3,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            }
+          ],
+          "answer": "2025-02-20,2025-07-08,2025-09-03,2025-12-01,2025-01-20,2025-05-27"
+        }
+      ],
+      "holdout": [
+        {
+          "calls": [
+            {
+              "start": "2025-04-15",
+              "n": 4,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-06-02",
+              "n": 3,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-01-16",
+              "n": 3,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-08-25",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-10-01",
+              "n": 4,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-12-10",
+              "n": 6,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            }
+          ],
+          "expect": "2025-04-22,2025-06-05,2025-01-22,2025-09-02,2025-10-07,2025-12-18"
+        },
+        {
+          "calls": [
+            {
+              "start": "2025-05-22",
+              "n": 2,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-06-17",
+              "n": 3,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-07-07",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-02-13",
+              "n": 2,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-11-18",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            },
+            {
+              "start": "2025-09-26",
+              "n": 4,
+              "closures": [
+                "2025-01-01",
+                "2025-01-09",
+                "2025-01-20",
+                "2025-02-17",
+                "2025-04-18",
+                "2025-05-26",
+                "2025-06-19",
+                "2025-07-04",
+                "2025-09-01",
+                "2025-11-27",
+                "2025-12-25"
+              ]
+            }
+          ],
+          "expect": "2025-05-27,2025-06-23,2025-07-14,2025-02-18,2025-11-25,2025-10-02"
+        },
+        {
+          "calls": [
+            {
+              "start": "2025-06-04",
+              "n": 2,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-06-18",
+              "n": 2,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-02-03",
+              "n": 5,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-03-10",
+              "n": 7,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-09-08",
+              "n": 4,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            },
+            {
+              "start": "2025-10-13",
+              "n": 6,
+              "closures": [
+                "2025-01-01",
+                "2025-01-06",
+                "2025-04-18",
+                "2025-04-21",
+                "2025-05-01",
+                "2025-05-29",
+                "2025-06-06",
+                "2025-06-20",
+                "2025-12-24",
+                "2025-12-25",
+                "2025-12-26",
+                "2025-12-31"
+              ]
+            }
+          ],
+          "expect": "2025-06-09,2025-06-23,2025-02-10,2025-03-19,2025-09-12,2025-10-21"
+        }
+      ]
+    }
+  ]
+}

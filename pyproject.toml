@@ -9,3 +9,9 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "rich>=15.0.0",
 ]
+
+[dependency-groups]
+taskgen = [
+    "exchange-calendars>=4.13.2",
+    "python-stdnum>=2.2",
+]

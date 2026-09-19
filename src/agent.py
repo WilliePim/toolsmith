@@ -38,35 +38,53 @@ class RunResult:
     tools_used: list[str] = field(default_factory=list)
     status: str = "unfinished"      # solved | wrong | unfinished | stopped
     note: str = ""
+    refusals: dict[str, int] = field(default_factory=dict)   # stage -> count
+    write_attempts: int = 0
 
     @property
     def correct(self) -> bool:
         return self.status == "solved"
+
+    @property
+    def repaired(self) -> bool:
+        """A tool was refused at least once and a later attempt still registered."""
+        return bool(self.refusals) and bool(self.tools_written)
+
+    @property
+    def api_error(self) -> bool:
+        """Stopped by the provider, not by the agent: not a result about the agent."""
+        return self.status == "stopped"
 
 
 class Agent:
     """Runs one task to an answer, printing a live trace of every round."""
 
     def __init__(self, family: Family, registry: Registry, tool_returns: str,
-                 console: Console | None = None):
+                 console: Console | None = None, allow_tools: bool = True):
         self.family = family
         self.registry = registry
         self.tool_returns = tool_returns
         self.console = console or Console()
+        # The baseline condition: the agent may not write or call generated tools.
+        self.allow_tools = allow_tools
 
     def _toolset(self, can_write: bool) -> list[dict[str, Any]]:
         """The one line: fixed tools + everything written so far + the controls."""
+        if not self.allow_tools:
+            return tools.SCHEMAS + prompts.meta_schemas(False)
         return tools.SCHEMAS + self.registry.schemas() + prompts.meta_schemas(can_write)
 
     async def solve(self, task: Task) -> RunResult:
         result = RunResult(task_id=task.id, expected=task.answer)
-        messages = [llm.user_message(prompts.task_prompt(task, self.family, self.tool_returns))]
-        writes_left = config.MAX_REPAIR_ATTEMPTS + 1
+        system = prompts.system_prompt(self.allow_tools)
+        messages = [llm.user_message(
+            prompts.task_prompt(task, self.family, self.tool_returns, self.allow_tools))]
+        writes_left = (config.MAX_REPAIR_ATTEMPTS + 1) if self.allow_tools else 0
 
         for round_no in range(1, config.MAX_ROUNDS + 1):
             result.rounds = round_no
             can_write = writes_left > 0
-            completion = await llm.complete(prompts.SYSTEM, messages, self._toolset(can_write))
+            completion = await llm.complete(system, messages, self._toolset(can_write))
             result.prompt_tokens += completion.prompt_tokens
             result.completion_tokens += completion.completion_tokens
 
@@ -119,6 +137,7 @@ class Agent:
         if writes_left <= 0:
             return prompts.REPAIRS_DONE, 0
         writes_left -= 1
+        result.write_attempts += 1
         spec = ToolSpec(
             name=str(call.args.get("name", "")),
             description=str(call.args.get("description", "")),
@@ -137,6 +156,8 @@ class Agent:
         self._log(result.rounds, f"write_tool {spec.name!r}: {verb}")
         if forged.ok:
             result.tools_written.append(spec.name)
+        else:
+            result.refusals[forged.stage] = result.refusals.get(forged.stage, 0) + 1
         return forged.message, writes_left
 
     def _call_generated(self, call: ToolCall, result: RunResult) -> ToolResult:
@@ -181,9 +202,9 @@ def _short(args: dict) -> str:
 
 
 async def solve(task: Task, family: Family, registry: Registry, tool_returns: str = "",
-                console: Console | None = None) -> RunResult:
+                console: Console | None = None, allow_tools: bool = True) -> RunResult:
     """Convenience wrapper: build an Agent and solve one task."""
-    return await Agent(family, registry, tool_returns, console).solve(task)
+    return await Agent(family, registry, tool_returns, console, allow_tools).solve(task)
 
 
 if __name__ == "__main__":

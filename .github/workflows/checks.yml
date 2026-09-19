@@ -1,0 +1,58 @@
+name: checks
+
+# Everything here runs without an API key: the module self-checks, the task
+# generators' byte comparison, and the full red-team suite. The suite is run on
+# Linux on purpose - the sandbox sets RLIMIT_AS there but cannot on Windows, and
+# the report records both platforms side by side.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group taskgen
+
+      - name: Module self-checks
+        run: |
+          for module in config taskgen tools llm protocol sandbox guard registry \
+                        smith tasks prompts agent; do
+            echo "--- $module"
+            uv run python -m "src.$module"
+          done
+
+      - name: Task files match their generators
+        run: |
+          uv run python -m src.taskgen --check
+          uv run --group taskgen python -m src.taskgen_finance --check
+
+      - name: Red team (both security layers)
+        run: uv run python -m src.redteam --json results/sandbox_linux.json
+
+      - name: Show the Linux sandbox report
+        run: |
+          python - <<'PY'
+          import json
+          d = json.load(open("results/sandbox_linux.json"))
+          print("platform:", d["platform"])
+          print("undeclared escapes:", d["escaped"] or "none")
+          print("documented limits:", [k["name"] for k in d["known_limits"]] or "none")
+          PY
+
+      - name: Upload the Linux sandbox report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sandbox-linux
+          path: results/sandbox_linux.json

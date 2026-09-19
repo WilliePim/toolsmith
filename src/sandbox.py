@@ -67,7 +67,11 @@ def run_calls(source: str, calls: Sequence[dict]) -> SandboxResult:
     script = protocol.build_script(source, nonce)
     stdin = "\n".join(__import__("json").dumps(call) for call in calls)
 
-    with tempfile.TemporaryDirectory(prefix="toolsmith_") as work:
+    # ignore_cleanup_errors: on Windows a child we just killed can still hold its
+    # stdout/stderr handles for a moment, and a failed cleanup must not take the
+    # whole run down - the directory is in %TEMP% and the OS reclaims it.
+    with tempfile.TemporaryDirectory(prefix="toolsmith_",
+                                     ignore_cleanup_errors=True) as work:
         script_path = Path(work) / "_TS_tool.py"
         script_path.write_text(script, encoding="utf-8")
         out_path, err_path = Path(work) / "out.txt", Path(work) / "err.txt"

@@ -58,6 +58,12 @@ GEMINI_REQUEST_SPACING_S = 4.0      # stays under a free-tier requests/minute ca
 # 1.0 a retry is already a fresh draw, so the PDF's temperature ladder is moot.
 GEMINI_TEMPERATURE: float | None = None
 
+# USD per million tokens, used only to price the benchmark. Source:
+# ai.google.dev/gemini-api/docs/pricing (Gemini 3.x Flash promotional rate,
+# quoted as valid through 2026-12-31). Update here, never in a document.
+GEMINI_PRICE_IN_PER_MTOK = 0.75
+GEMINI_PRICE_OUT_PER_MTOK = 3.75
+
 CLAUDE_MODEL = _env("CLAUDE_MODEL", "claude-opus-5")
 CLAUDE_EFFORT = "low"               # the PDF's reasoning_effort, Claude's way
 CLAUDE_MAX_TOKENS = 16000           # thinking counts too; no streaming needed

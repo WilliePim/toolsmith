@@ -11,7 +11,7 @@ sandbox with the guard skipped, to prove the audit hook holds on its own.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,6 +20,28 @@ class Attack:
     layer: str          # "guard" or "sandbox"
     source: str
     params: tuple[str, ...] = ("x",)
+    category: str = "other"
+    args: tuple[tuple[str, str], ...] = ()   # call arguments, when a placeholder won't do
+    # Platforms where this attack is KNOWN to get through, with the reason. It is
+    # then reported as a documented limit instead of a surprise - but an escape
+    # that is not declared here still fails the suite.
+    known_escape_on: tuple[str, ...] = ()
+    known_escape_reason: str = ""
+
+    def call_args(self) -> dict[str, str]:
+        return dict(self.args) if self.args else {p: "test" for p in self.params}
+
+
+def _outside_path() -> str:
+    """A real path outside the sandbox, for the reads and writes that must be refused."""
+    from src import config
+    return str((config.ROOT_DIR / ".env").resolve())
+
+
+# The categories a report groups by. Each one must be represented in ATTACKS.
+CATEGORIES = ("read outside the allowed directory", "write to disk", "network access",
+              "process spawn", "infinite loop", "excessive memory",
+              "forbidden module import", "interpreter escape", "swallow the violation")
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,22 +109,89 @@ _GUARD = [
 # guard's own targets, sent straight to the sandbox to prove it stands alone.
 
 _SANDBOX = [
-    Attack("infinite loop", "sandbox", "def run(x):\n    while True:\n        pass"),
+    Attack("infinite loop", "sandbox", "def run(x):\n    while True:\n        pass",
+           category="infinite loop"),
     Attack("print flood", "sandbox",
-           "def run(x):\n    while True:\n        print('x' * 4096)"),
-    Attack("deep recursion", "sandbox", "def run(x):\n    return run(x)"),
+           "def run(x):\n    while True:\n        print('x' * 4096)",
+           category="infinite loop"),
+    Attack("deep recursion", "sandbox", "def run(x):\n    return run(x)",
+           category="excessive memory"),
+    # Roughly 4 GB in one go. On POSIX the sandbox's RLIMIT_AS should refuse it
+    # outright; on Windows there is no such cap, so only the watchdog can end it.
+    Attack("memory bomb (4 GB)", "sandbox",
+           "def run(x):\n    blob = bytearray(4 * 10**9)\n    return str(len(blob))",
+           category="excessive memory", known_escape_on=("Windows",),
+           known_escape_reason="Windows has no RLIMIT_AS equivalent here, and a single "
+                               "large allocation finishes well inside the watchdog's "
+                               "timeout. Measured: it returns 4,000,000,000."),
+    Attack("memory bomb (growing list)", "sandbox",
+           "def run(x):\n    acc = []\n    while True:\n        acc.append('y' * 10**6)",
+           category="excessive memory"),
     Attack("sys.exit in run", "sandbox",
-           "import sys\ndef run(x):\n    sys.exit(0)"),
-    Attack("non-serialisable return", "sandbox", "def run(x):\n    return {1, 2, 3}"),
+           "import sys\ndef run(x):\n    sys.exit(0)", category="interpreter escape"),
+    Attack("non-serialisable return", "sandbox", "def run(x):\n    return {1, 2, 3}",
+           category="other"),
     Attack("os.system (guard skipped)", "sandbox",
-           "import os\ndef run(x):\n    return os.system('echo pwned')"),
+           "import os\ndef run(x):\n    return os.system('echo pwned')",
+           category="process spawn"),
+    Attack("subprocess spawn (guard skipped)", "sandbox",
+           "import subprocess\ndef run(x):\n"
+           "    return str(subprocess.run(['echo', 'pwned'], capture_output=True))",
+           category="process spawn"),
     Attack("write a file (guard skipped)", "sandbox",
-           "def run(x):\n    open('pwned.txt', 'w').write('x')\n    return 'wrote'"),
+           "def run(x):\n    open('pwned.txt', 'w').write('x')\n    return 'wrote'",
+           category="write to disk"),
+    Attack("append to a file elsewhere (guard skipped)", "sandbox",
+           "def run(x):\n    open(x, 'a').write('pwned')\n    return 'appended'",
+           category="write to disk", args=(("x", _outside_path()),)),
     Attack("socket (guard skipped)", "sandbox",
-           "import socket\ndef run(x):\n    s = socket.socket()\n    return 'made socket'"),
+           "import socket\ndef run(x):\n    s = socket.socket()\n    return 'made socket'",
+           category="network access"),
+    Attack("dns lookup (guard skipped)", "sandbox",
+           "import socket\ndef run(x):\n    return socket.gethostbyname('example.com')",
+           category="network access"),
     Attack("os.listdir (guard skipped)", "sandbox",
-           "import os\ndef run(x):\n    return str(os.listdir('.'))"),
+           "import os\ndef run(x):\n    return str(os.listdir('.'))",
+           category="read outside the allowed directory"),
+    Attack("read a file outside the sandbox (guard skipped)", "sandbox",
+           "def run(x):\n    return open(x).read()[:40]",
+           category="read outside the allowed directory", args=(("x", _outside_path()),)),
 ]
+
+# The guard attacks are categorised here rather than inline, so the list above stays
+# readable and every name is forced to appear exactly once.
+_GUARD_CATEGORIES = {
+    "import os": "forbidden module import",
+    "import subprocess": "forbidden module import",
+    "import socket": "forbidden module import",
+    "from os import system": "forbidden module import",
+    "aliased import": "forbidden module import",
+    "importlib": "forbidden module import",
+    "__import__": "forbidden module import",
+    "star import": "forbidden module import",
+    "eval": "interpreter escape",
+    "exec": "interpreter escape",
+    "compile": "interpreter escape",
+    "annotation eval": "interpreter escape",
+    "open": "read outside the allowed directory",
+    "getattr pivot": "interpreter escape",
+    "dunder class walk": "interpreter escape",
+    "mro subclasses": "interpreter escape",
+    "globals": "interpreter escape",
+    "builtins via dunder": "interpreter escape",
+    "typing.sys pivot": "interpreter escape",
+    "collections private": "interpreter escape",
+    "frame walk": "interpreter escape",
+    "format traversal": "interpreter escape",
+    "format map": "interpreter escape",
+    "reserved prefix": "interpreter escape",
+    "bare except swallow": "swallow the violation",
+    "except BaseException": "swallow the violation",
+    "return in finally": "swallow the violation",
+}
+
+_GUARD = [replace(a, category=_GUARD_CATEGORIES[a.name]) for a in _GUARD]
+assert set(_GUARD_CATEGORIES) == {a.name for a in _GUARD}, "every guard attack needs a category"
 
 ATTACKS: tuple[Attack, ...] = tuple(_GUARD + _SANDBOX)
 

@@ -13,10 +13,16 @@ from src import config
 from src.smith import Family
 from src.tasks import Task
 
-SYSTEM = """\
+# The system prompt is assembled from blocks so the baseline condition can drop
+# exactly the tool-writing ones and keep everything else byte-identical. A
+# baseline told about a tool it does not have would be handicapped, not measured.
+
+_OPENING = """\
 You are toolsmith, an agent that solves each task by the cheapest reliable means.
 
-You have a calculator and today's date to start with. When a task applies one \
+You have a calculator and today's date to start with."""
+
+_TOOL_WRITING = """ When a task applies one \
 rule across many inputs, do not work it out by hand: write a tool with write_tool, \
 then call it. A written tool is exact and reusable, and a later task of the same \
 kind can just call it.
@@ -32,9 +38,22 @@ hand, before you write the code. If you cannot, you do not yet understand the ru
 so make run() follow the rule in general, not just for your tests.
 
 If a tool is refused, read the reason and repair it: a refusal is a step, not the \
-end. When you have the final answer, call submit_answer with exactly the format \
-the task asks for. Do not call submit_answer until you are sure.
-""".format(imports=", ".join(sorted(config.ALLOWED_IMPORTS)))
+end.""".format(imports=", ".join(sorted(config.ALLOWED_IMPORTS)))
+
+_CLOSING = """ When you have the final answer, call submit_answer with exactly \
+the format the task asks for. Do not call submit_answer until you are sure.
+"""
+
+
+def system_prompt(allow_tools: bool = True) -> str:
+    """The system prompt. Without tools, only the tool-writing blocks are removed."""
+    if allow_tools:
+        return _OPENING + _TOOL_WRITING + "\n" + _CLOSING
+    return _OPENING + _CLOSING
+
+
+SYSTEM = system_prompt(True)
+SYSTEM_BASELINE = system_prompt(False)
 
 
 def interface_line(family: Family, tool_returns: str) -> str:
@@ -46,8 +65,15 @@ def interface_line(family: Family, tool_returns: str) -> str:
             f"called once per input. Its parameters are: {params}.{returns}")
 
 
-def task_prompt(task: Task, family: Family, tool_returns: str) -> str:
-    """The task's own prompt, plus the interface line the tool must match."""
+def task_prompt(task: Task, family: Family, tool_returns: str,
+                allow_tools: bool = True) -> str:
+    """The task's own prompt, plus the interface line when tools are available.
+
+    The baseline drops the interface line for the same reason it drops the
+    tool-writing blocks: it describes a tool that condition cannot write.
+    """
+    if not allow_tools:
+        return task.prompt
     return task.prompt + interface_line(family, tool_returns)
 
 

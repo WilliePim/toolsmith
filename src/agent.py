@@ -128,7 +128,12 @@ class Agent:
             source=str(call.args.get("source", "")),
             tests=tuple(call.args.get("tests", ())))
         forged = forge(spec, self.family, self.registry)
-        verb = "[green]registered[/]" if forged.ok else f"[yellow]refused ({forged.stage})[/]"
+        if forged.ok:
+            verb = "[green]registered[/]"
+        else:
+            # Show the reason, not just the stage: the model is told why, and so
+            # should anyone watching the run.
+            verb = f"[yellow]refused ({forged.stage})[/] {forged.message[:110]}"
         self._log(result.rounds, f"write_tool {spec.name!r}: {verb}")
         if forged.ok:
             result.tools_written.append(spec.name)

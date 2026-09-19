@@ -45,15 +45,21 @@ def _env(name: str, default: str) -> str:
 PROVIDERS = ("gemini", "claude")
 PROVIDER = _env("PROVIDER", "gemini").lower()
 
+MODEL_TIMEOUT_S = 120.0             # one model call, before it counts as failed
+
 GEMINI_MODEL = _env("GEMINI_MODEL", "gemini-3.6-flash")
 GEMINI_THINKING_LEVEL = "low"
 GEMINI_MAX_OUTPUT_TOKENS = 8192     # thinking tokens count against this too
 GEMINI_REQUEST_SPACING_S = 4.0      # stays under a free-tier requests/minute cap
+# None keeps the model's own default. Gemini 3 models are tuned for 1.0, and at
+# 1.0 a retry is already a fresh draw, so the PDF's temperature ladder is moot.
+GEMINI_TEMPERATURE: float | None = None
 
 CLAUDE_MODEL = _env("CLAUDE_MODEL", "claude-opus-5")
 CLAUDE_EFFORT = "low"               # the PDF's reasoning_effort, Claude's way
 CLAUDE_MAX_TOKENS = 16000           # thinking counts too; no streaming needed
 CLAUDE_REQUEST_SPACING_S = 0.0
+CLAUDE_FALLBACKS = True             # server-side fallback if a request is declined
 
 # --- The agent's budget ----------------------------------------------------
 # MAX_ROUNDS is ten, not six, and the arithmetic is why: three rejected tools,

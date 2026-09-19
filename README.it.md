@@ -24,6 +24,7 @@ Uno strumento scritto dal modello attraversa quattro cancelli prima di poter ess
 > `uv run python -m src.bench --repeats 10 && uv run python -m src.report`.
 
 <!-- GENERATED:bench-header:START -->
+Modello **gemini-3.8-flash**, temperatura *provider default (unset)*, commit `f292c9f+dirty`, eseguito il 2026-09-19. 10 ripetizioni per compito e condizione: 160 esecuzioni, 289,046 token in uscita, costo totale $2.31. Errori del provider rilanciati: 0. Escluse dalle medie 5 esecuzioni fuori disegno, raccolte dopo per catturare una traccia.
 <!-- GENERATED:bench-header:END -->
 
 ## Che aspetto ha
@@ -50,11 +51,34 @@ degli strumenti*: un prompt che descrivesse uno strumento che quella condizione 
 usare la penalizzerebbe, invece di misurarla.
 
 <!-- GENERATED:prompt-diff:START -->
+Vengono tolte solo le righe sugli strumenti; l'apertura e l'istruzione finale sono identiche byte per byte nelle due condizioni.
+
+```diff
+--- with tools
++++ baseline
+@@ -2,11 +2,2 @@
+ 
+-You have a calculator and today's date to start with. When a task applies one rule across many inputs, do not work it out by hand: write a tool with write_tool, then call it. A written tool is exact and reusable, and a later task of the same kind can just call it.
+-
+-When you write a tool, follow this contract exactly:
+-- Define one function, run(...), taking exactly the parameters the task states, and returning a string.
+-- Use only the Python standard library, and only these modules: calendar, collections, datetime, decimal, functools, itertools, json, math, re, string, typing. Do not read files, write files, use the network, or print anything you need - return it.
+-- Work out each test's expected result from the worked example in the task, by hand, before you write the code. If you cannot, you do not yet understand the rule.
+-- Give at least two tests. The tool is also checked against inputs you cannot see, so make run() follow the rule in general, not just for your tests.
+-
+-If a tool is refused, read the reason and repair it: a refusal is a step, not the end.
+- When you have the final answer, call submit_answer with exactly the format the task asks for. Do not call submit_answer until you are sure.
++You have a calculator and today's date to start with. When you have the final answer, call submit_answer with exactly the format the task asks for. Do not call submit_answer until you are sure.
+```
 <!-- GENERATED:prompt-diff:END -->
 
 ### Accuratezza e costo, per condizione
 
 <!-- GENERATED:bench-conditions:START -->
+| condizione | run | risolti | accuratezza | token in (media) | token out (media) | costo totale (USD) |
+|---|---|---|---|---|---|---|
+| tools | 80 | 80 | 100% | 7,795 | 697 | $0.68 |
+| baseline | 80 | 66 | 82% | 12,659 | 2,916 | $1.63 |
 <!-- GENERATED:bench-conditions:END -->
 
 ### Riuso: quanto costa il secondo compito di una famiglia
@@ -64,11 +88,64 @@ limitarsi a chiamarlo. Misurato per ogni ripetizione, poi riportato come media e
 intervallo — una coppia sola è un aneddoto.
 
 <!-- GENERATED:bench-reuse:START -->
+| famiglia | coppie | token out primo task (media) | secondo (media) | risparmio medio | coppia peggiore | coppia migliore |
+|---|---|---|---|---|---|---|
+| gstin | 10 | 508 | 272 | 1.8x in meno | 1.4x in piu | 3.3x in meno |
+| isin | 10 | 988 | 250 | 3.7x in meno | 1.6x in meno | 6.8x in meno |
+| isoweek | 10 | 453 | 166 | 2.5x in meno | 2.1x in meno | 4.6x in meno |
+| sessions | 10 | 1,648 | 1,288 | 1.3x in meno | 1.2x in meno | 1.4x in meno |
 <!-- GENERATED:bench-reuse:END -->
+
+Il riuso non è denaro gratis, e la tabella lo dice: per `sessions` il risparmio è
+modesto, perché ogni chiamata porta comunque l'elenco delle festività della borsa, e per
+`gstin` almeno una ripetizione ha speso *di più* sul secondo compito che sul primo. Ciò
+che regge in tutte e quattro le famiglie è l'accuratezza, non uno sconto fisso.
+
+### Dove i quattro cancelli sono scattati davvero
+
+Uno strumento viene registrato solo dopo che la guardia l'ha letto e il sandbox l'ha
+eseguito su input che il modello non vede mai. Ecco quante volte questo ha respinto
+qualcosa durante queste esecuzioni:
+
+Quella tabella va letta con rigore. I rifiuti vengono dai test *propri* del modello e dal
+controllo della specifica, e **il controllo su input nascosti non ha mai dovuto respingere
+uno strumento in queste 160 esecuzioni**: ha girato ogni volta e ha approvato ogni volta.
+Il suo valore è quindi dimostrato per costruzione, non da queste esecuzioni:
+`uv run python -m src.smith` costruisce uno strumento GSTIN volutamente sbagliato che
+supera i propri test, e mostra il controllo nascosto che lo coglie rivelando solo un
+conteggio e un indizio. Un'esecuzione in cui un modello scriva da sé uno strumento simile
+non è in questo campione.
+
+<!-- GENERATED:bench-refusals:START -->
+| cancello che ha respinto uno strumento | volte |
+|---|---|
+| own_tests | 3 |
+| tests | 2 |
+
+45 tentativi di scrittura in totale; 5 respinti e 3 esecuzioni hanno poi registrato uno strumento riparato.
+<!-- GENERATED:bench-refusals:END -->
 
 ### Per compito
 
 <!-- GENERATED:bench-tasks:START -->
+| task | condizione | run | risolti | tool respinti | riparati | round (media) | token out media (min-max) |
+|---|---|---|---|---|---|---|---|
+| gstin_1 | baseline | 10 | 8/10 | 0 | 0 | 8.8 | 4,292 (982-5,266) |
+| gstin_2 | baseline | 10 | 8/10 | 0 | 0 | 9.8 | 4,780 (1,961-5,875) |
+| isoweek_1 | baseline | 10 | 4/10 | 0 | 0 | 8.8 | 895 (289-3,079) |
+| isoweek_2 | baseline | 10 | 10/10 | 0 | 0 | 6.3 | 1,624 (100-4,099) |
+| isin_1 | baseline | 10 | 6/10 | 0 | 0 | 8.9 | 2,286 (385-5,185) |
+| isin_2 | baseline | 10 | 10/10 | 0 | 0 | 8.3 | 3,680 (3,064-5,115) |
+| sessions_1 | baseline | 10 | 10/10 | 0 | 0 | 1.2 | 2,890 (2,404-3,266) |
+| sessions_2 | baseline | 10 | 10/10 | 0 | 0 | 1.3 | 2,885 (2,178-3,924) |
+| gstin_1 | tools | 10 | 10/10 | 0 | 0 | 4.2 | 508 (400-990) |
+| gstin_2 | tools | 10 | 10/10 | 0 | 0 | 5.1 | 272 (138-606) |
+| isoweek_1 | tools | 10 | 10/10 | 5 | 3 | 4.7 | 453 (350-764) |
+| isoweek_2 | tools | 10 | 10/10 | 0 | 0 | 2.7 | 166 (166-166) |
+| isin_1 | tools | 10 | 10/10 | 0 | 0 | 4.1 | 988 (599-1,437) |
+| isin_2 | tools | 10 | 10/10 | 0 | 0 | 6.5 | 250 (210-610) |
+| sessions_1 | tools | 10 | 10/10 | 0 | 0 | 4.9 | 1,648 (1,537-1,698) |
+| sessions_2 | tools | 10 | 10/10 | 0 | 0 | 5.1 | 1,288 (1,202-1,403) |
 <!-- GENERATED:bench-tasks:END -->
 
 ## Dove sbaglia
@@ -76,7 +153,47 @@ intervallo — una coppia sola è un aneddoto.
 I fallimenti sono elencati, non nascosti e non rilanciati finché passano. Ogni
 esecuzione qui sotto è in `results/runs/` con il suo record completo.
 
+Ogni fallimento in queste esecuzioni è un fallimento del **baseline**, e una traccia
+spiega lo schema meglio della tabella. Il baseline non sbaglia il metodo — calcola
+correttamente la settimana ISO — ma spende un round intero per ogni passaggio aritmetico,
+e finisce i round prima di arrivare alla risposta. Uno strumento scritto fa tutti e
+quattro gli input in un round solo.
+
+<!-- GENERATED:bench-trace:START -->
+`core__baseline__isoweek_1__r14` - isoweek_1, baseline, finita *unfinished* dopo 10 round:
+
+```
+r1 calc(expression='0') -> '0'
+r2 calc(expression='(2027 + 2027//4 - 2027//100 + 2027//400) % 7') -> '5'
+r3 calc(expression='31+28+31+30+31+30+31+7') -> '219'
+r4 calc(expression='(219 + 4) // 7') -> '31'
+r5 calc(expression='(5 + 219 - 1) % 7') -> '6'
+r6 calc(expression='31+28+31+30+31+30+31+31+28') -> '271'
+r7 calc(expression='(271 + 7 - 5) // 7') -> '39'
+r8 calc(expression='31+16') -> '47'
+r9 calc(expression='(47 + 2) // 7') -> '7'
+r10 calc(expression='31+28+31+30+31+11') -> '162'
+r10 out of rounds
+```
+<!-- GENERATED:bench-trace:END -->
+
 <!-- GENERATED:bench-failures:START -->
+| run | task | condizione | cosa è successo | risposta data |
+|---|---|---|---|---|
+| `core__baseline__gstin_1__r02` | gstin_1 | baseline | unfinished | `-` |
+| `core__baseline__gstin_1__r05` | gstin_1 | baseline | unfinished | `-` |
+| `core__baseline__gstin_2__r01` | gstin_2 | baseline | unfinished | `-` |
+| `core__baseline__gstin_2__r04` | gstin_2 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r01` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r02` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r04` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r05` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r06` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r09` | isoweek_1 | baseline | unfinished | `-` |
+| `finance__baseline__isin_1__r03` | isin_1 | baseline | wrong | `810566` |
+| `finance__baseline__isin_1__r05` | isin_1 | baseline | wrong | `019517` |
+| `finance__baseline__isin_1__r08` | isin_1 | baseline | unfinished | `-` |
+| `finance__baseline__isin_1__r09` | isin_1 | baseline | unfinished | `-` |
 <!-- GENERATED:bench-failures:END -->
 
 ## Il sandbox, misurato
@@ -95,6 +212,9 @@ alla rete, avvio di processi, cicli infiniti, uso eccessivo di memoria, import d
 vietati, fuga dall'interprete, e ingoiare la violazione del sandbox.
 
 <!-- GENERATED:sandbox:START -->
+| piattaforma | tetto memoria | attacchi | contenuti | dalla guardia | dal sandbox | limiti dichiarati | fughe non dichiarate |
+|---|---|---|---|---|---|---|---|
+| Windows | none (Windows: only the watchdog timeout) | 42 | 41/42 | 27 | 14 | memory bomb (4 GB) | none |
 <!-- GENERATED:sandbox:END -->
 
 **Un limite dichiarato, non corretto.** Su Windows una singola allocazione da 4 GB *non*

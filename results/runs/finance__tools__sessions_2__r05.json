@@ -1,0 +1,48 @@
+{
+  "run_id": "finance__tools__sessions_2__r05",
+  "task_set": "finance",
+  "task": "sessions_2",
+  "family": "sessions",
+  "condition": "tools",
+  "repetition": 5,
+  "status": "solved",
+  "answer": "2025-02-20,2025-07-08,2025-09-03,2025-12-01,2025-01-20,2025-05-27",
+  "expected": "2025-02-20,2025-07-08,2025-09-03,2025-12-01,2025-01-20,2025-05-27",
+  "correct": true,
+  "rounds": 3,
+  "prompt_tokens": 5962,
+  "completion_tokens": 1403,
+  "tools_written": [],
+  "tools_used": [
+    "nth_trading_session",
+    "nth_trading_session",
+    "nth_trading_session",
+    "nth_trading_session",
+    "nth_trading_session",
+    "nth_trading_session",
+    "nth_trading_session"
+  ],
+  "refusals": {},
+  "write_attempts": 0,
+  "repaired": false,
+  "note": "",
+  "api_retries": 0,
+  "api_error": false,
+  "tokens_lost_to_api_errors": {
+    "prompt": 0,
+    "completion": 0
+  },
+  "duration_s": 20.43,
+  "meta": {
+    "model": "gemini-3.8-flash",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "f292c9f+dirty",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-19T16:51:40+00:00"
+  }
+}

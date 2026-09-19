@@ -1,0 +1,50 @@
+{
+  "run_id": "core__tools__isoweek_1__r02",
+  "task_set": "core",
+  "task": "isoweek_1",
+  "family": "isoweek",
+  "condition": "tools",
+  "repetition": 2,
+  "status": "solved",
+  "answer": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+  "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+  "correct": true,
+  "rounds": 8,
+  "prompt_tokens": 14545,
+  "completion_tokens": 764,
+  "tools_written": [
+    "iso_week_label"
+  ],
+  "tools_used": [
+    "iso_week_label",
+    "iso_week_label",
+    "iso_week_label",
+    "iso_week_label"
+  ],
+  "refusals": {
+    "tests": 1,
+    "own_tests": 1
+  },
+  "write_attempts": 3,
+  "repaired": true,
+  "note": "",
+  "api_retries": 0,
+  "api_error": false,
+  "tokens_lost_to_api_errors": {
+    "prompt": 0,
+    "completion": 0
+  },
+  "duration_s": 44.02,
+  "meta": {
+    "model": "gemini-3.8-flash",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "f292c9f+dirty",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-19T16:51:40+00:00"
+  }
+}

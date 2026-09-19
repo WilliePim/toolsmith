@@ -1,0 +1,47 @@
+{
+  "run_id": "core__tools__gstin_2__r02",
+  "task_set": "core",
+  "task": "gstin_2",
+  "family": "gstin",
+  "condition": "tools",
+  "repetition": 2,
+  "status": "solved",
+  "answer": "HXOW",
+  "expected": "HXOW",
+  "correct": true,
+  "rounds": 3,
+  "prompt_tokens": 3754,
+  "completion_tokens": 401,
+  "tools_written": [],
+  "tools_used": [
+    "gstin_checksum",
+    "gstin_checksum",
+    "gstin_checksum",
+    "gstin_checksum",
+    "gstin_checksum",
+    "gstin_checksum"
+  ],
+  "refusals": {},
+  "write_attempts": 0,
+  "repaired": false,
+  "note": "",
+  "api_retries": 0,
+  "api_error": false,
+  "tokens_lost_to_api_errors": {
+    "prompt": 0,
+    "completion": 0
+  },
+  "duration_s": 16.02,
+  "meta": {
+    "model": "gemini-3.8-flash",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "f292c9f+dirty",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-19T16:51:40+00:00"
+  }
+}

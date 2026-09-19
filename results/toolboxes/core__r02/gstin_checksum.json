@@ -1,0 +1,37 @@
+{
+  "name": "gstin_checksum",
+  "description": "Compute GSTIN check character from 14-character prefix",
+  "parameters": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "prefix"
+    ],
+    "properties": {
+      "prefix": {
+        "type": "string",
+        "description": "the first 14 characters of a GSTIN"
+      }
+    }
+  },
+  "set": "core",
+  "family": "gstin",
+  "joiner": "",
+  "tests": [
+    {
+      "expect": "C",
+      "args": {
+        "prefix": "22AAAAA0000A1Z"
+      }
+    },
+    {
+      "args": {
+        "prefix": "07AABCS1429B1Z"
+      },
+      "expect": "W"
+    }
+  ],
+  "created": "2026-09-19T16:59:45+00:00",
+  "uses": 10,
+  "sha256": "3105ab466a2bf67dc829bb0f75ba47fb45ca0da109f0f1f0f27d4ffa5b03cb10"
+}

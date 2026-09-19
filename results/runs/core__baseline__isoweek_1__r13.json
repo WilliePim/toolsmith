@@ -1,0 +1,43 @@
+{
+  "run_id": "core__baseline__isoweek_1__r13",
+  "task_set": "core",
+  "task": "isoweek_1",
+  "family": "isoweek",
+  "condition": "baseline",
+  "repetition": 13,
+  "status": "solved",
+  "answer": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+  "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+  "correct": true,
+  "rounds": 7,
+  "prompt_tokens": 12497,
+  "completion_tokens": 2192,
+  "tools_written": [],
+  "tools_used": [],
+  "refusals": {},
+  "write_attempts": 0,
+  "repaired": false,
+  "note": "",
+  "trace": [
+    "r7 submit_answer -> '2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1' correct"
+  ],
+  "api_retries": 0,
+  "api_error": false,
+  "tokens_lost_to_api_errors": {
+    "prompt": 0,
+    "completion": 0
+  },
+  "duration_s": 40.98,
+  "meta": {
+    "model": "gemini-3.8-flash",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "867de16+dirty",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-19T18:27:52+00:00"
+  }
+}

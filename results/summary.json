@@ -1,0 +1,850 @@
+{
+  "generated": "2026-09-19T18:32:22+00:00",
+  "meta": {
+    "model": "gemini-3.8-flash",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "f292c9f+dirty",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-19T16:48:47+00:00"
+  },
+  "totals": {
+    "repeats": 10,
+    "runs": 160,
+    "api_failed_runs": 0,
+    "extra_runs_excluded": 5,
+    "api_retries": 0,
+    "prompt_tokens": 1636319,
+    "completion_tokens": 289046,
+    "cost_usd": 2.31116175
+  },
+  "tasks": [
+    {
+      "task": "gstin_1",
+      "family": "gstin",
+      "task_set": "core",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 8,
+      "wrong": 0,
+      "unfinished": 2,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 20376.7,
+        "min": 10135,
+        "max": 25755,
+        "n": 10
+      },
+      "completion": {
+        "mean": 4291.9,
+        "min": 982,
+        "max": 5266,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 8.8,
+        "min": 6,
+        "max": 10,
+        "n": 10
+      },
+      "cost_usd": 0.3137715
+    },
+    {
+      "task": "gstin_2",
+      "family": "gstin",
+      "task_set": "core",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 8,
+      "wrong": 0,
+      "unfinished": 2,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 23686.1,
+        "min": 17441,
+        "max": 28793,
+        "n": 10
+      },
+      "completion": {
+        "mean": 4779.5,
+        "min": 1961,
+        "max": 5875,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 9.8,
+        "min": 9,
+        "max": 10,
+        "n": 10
+      },
+      "cost_usd": 0.356877
+    },
+    {
+      "task": "isoweek_1",
+      "family": "isoweek",
+      "task_set": "core",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 4,
+      "wrong": 0,
+      "unfinished": 6,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 7709.0,
+        "min": 5694,
+        "max": 9131,
+        "n": 10
+      },
+      "completion": {
+        "mean": 895.3,
+        "min": 289,
+        "max": 3079,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 8.8,
+        "min": 5,
+        "max": 10,
+        "n": 10
+      },
+      "cost_usd": 0.09139125000000001
+    },
+    {
+      "task": "isoweek_2",
+      "family": "isoweek",
+      "task_set": "core",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 7352.7,
+        "min": 1555,
+        "max": 13122,
+        "n": 10
+      },
+      "completion": {
+        "mean": 1623.5,
+        "min": 100,
+        "max": 4099,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 6.3,
+        "min": 3,
+        "max": 10,
+        "n": 10
+      },
+      "cost_usd": 0.11602649999999999
+    },
+    {
+      "task": "isin_1",
+      "family": "isin",
+      "task_set": "finance",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 6,
+      "wrong": 2,
+      "unfinished": 2,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 17402.2,
+        "min": 8486,
+        "max": 34245,
+        "n": 10
+      },
+      "completion": {
+        "mean": 2285.6,
+        "min": 385,
+        "max": 5185,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 8.9,
+        "min": 8,
+        "max": 10,
+        "n": 10
+      },
+      "cost_usd": 0.21622650000000002
+    },
+    {
+      "task": "isin_2",
+      "family": "isin",
+      "task_set": "finance",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 22632.2,
+        "min": 18181,
+        "max": 33465,
+        "n": 10
+      },
+      "completion": {
+        "mean": 3680.5,
+        "min": 3064,
+        "max": 5115,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 8.3,
+        "min": 8,
+        "max": 9,
+        "n": 10
+      },
+      "cost_usd": 0.30776024999999996
+    },
+    {
+      "task": "sessions_1",
+      "family": "sessions",
+      "task_set": "finance",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 757.3,
+        "min": 622,
+        "max": 1299,
+        "n": 10
+      },
+      "completion": {
+        "mean": 2890.0,
+        "min": 2404,
+        "max": 3266,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 1.2,
+        "min": 1,
+        "max": 2,
+        "n": 10
+      },
+      "cost_usd": 0.11405475
+    },
+    {
+      "task": "sessions_2",
+      "family": "sessions",
+      "task_set": "finance",
+      "condition": "baseline",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 1355.4,
+        "min": 633,
+        "max": 4162,
+        "n": 10
+      },
+      "completion": {
+        "mean": 2884.9,
+        "min": 2178,
+        "max": 3924,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 1.3,
+        "min": 1,
+        "max": 2,
+        "n": 10
+      },
+      "cost_usd": 0.11834924999999999
+    },
+    {
+      "task": "gstin_1",
+      "family": "gstin",
+      "task_set": "core",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 10,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 5998.8,
+        "min": 3907,
+        "max": 8689,
+        "n": 10
+      },
+      "completion": {
+        "mean": 508.1,
+        "min": 400,
+        "max": 990,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 4.2,
+        "min": 3,
+        "max": 6,
+        "n": 10
+      },
+      "cost_usd": 0.06404475
+    },
+    {
+      "task": "gstin_2",
+      "family": "gstin",
+      "task_set": "core",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 6425.0,
+        "min": 3445,
+        "max": 8907,
+        "n": 10
+      },
+      "completion": {
+        "mean": 271.9,
+        "min": 138,
+        "max": 606,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 5.1,
+        "min": 3,
+        "max": 7,
+        "n": 10
+      },
+      "cost_usd": 0.05838375
+    },
+    {
+      "task": "isoweek_1",
+      "family": "isoweek",
+      "task_set": "core",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 5,
+      "repaired": 3,
+      "write_attempts": 15,
+      "refusal_stages": {
+        "tests": 2,
+        "own_tests": 3
+      },
+      "prompt": {
+        "mean": 7360.7,
+        "min": 4038,
+        "max": 14545,
+        "n": 10
+      },
+      "completion": {
+        "mean": 453.0,
+        "min": 350,
+        "max": 764,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 4.7,
+        "min": 3,
+        "max": 8,
+        "n": 10
+      },
+      "cost_usd": 0.07219275
+    },
+    {
+      "task": "isoweek_2",
+      "family": "isoweek",
+      "task_set": "core",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 3416.6,
+        "min": 2492,
+        "max": 6505,
+        "n": 10
+      },
+      "completion": {
+        "mean": 166.0,
+        "min": 166,
+        "max": 166,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 2.7,
+        "min": 2,
+        "max": 5,
+        "n": 10
+      },
+      "cost_usd": 0.0318495
+    },
+    {
+      "task": "isin_1",
+      "family": "isin",
+      "task_set": "finance",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 10,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 7777.6,
+        "min": 4517,
+        "max": 18432,
+        "n": 10
+      },
+      "completion": {
+        "mean": 987.9,
+        "min": 599,
+        "max": 1437,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 4.1,
+        "min": 3,
+        "max": 8,
+        "n": 10
+      },
+      "cost_usd": 0.09537825
+    },
+    {
+      "task": "isin_2",
+      "family": "isin",
+      "task_set": "finance",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 8937.2,
+        "min": 3781,
+        "max": 12015,
+        "n": 10
+      },
+      "completion": {
+        "mean": 250.0,
+        "min": 210,
+        "max": 610,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 6.5,
+        "min": 3,
+        "max": 8,
+        "n": 10
+      },
+      "cost_usd": 0.07640399999999999
+    },
+    {
+      "task": "sessions_1",
+      "family": "sessions",
+      "task_set": "finance",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 10,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 11488.5,
+        "min": 6122,
+        "max": 19915,
+        "n": 10
+      },
+      "completion": {
+        "mean": 1648.1,
+        "min": 1537,
+        "max": 1698,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 4.9,
+        "min": 3,
+        "max": 8,
+        "n": 10
+      },
+      "cost_usd": 0.1479675
+    },
+    {
+      "task": "sessions_2",
+      "family": "sessions",
+      "task_set": "finance",
+      "condition": "tools",
+      "runs": 10,
+      "solved": 10,
+      "wrong": 0,
+      "unfinished": 0,
+      "refused_tools": 0,
+      "repaired": 0,
+      "write_attempts": 0,
+      "refusal_stages": {},
+      "prompt": {
+        "mean": 10955.9,
+        "min": 4062,
+        "max": 17960,
+        "n": 10
+      },
+      "completion": {
+        "mean": 1288.4,
+        "min": 1202,
+        "max": 1403,
+        "n": 10
+      },
+      "rounds": {
+        "mean": 5.1,
+        "min": 2,
+        "max": 8,
+        "n": 10
+      },
+      "cost_usd": 0.13048425
+    }
+  ],
+  "reuse": {
+    "gstin": {
+      "pairs": 10,
+      "ratio": {
+        "mean": 0.5614167893277919,
+        "min": 0.300763358778626,
+        "max": 1.4497607655502391,
+        "n": 10
+      },
+      "first_completion": {
+        "mean": 508.1,
+        "min": 400,
+        "max": 990,
+        "n": 10
+      },
+      "second_completion": {
+        "mean": 271.9,
+        "min": 138,
+        "max": 606,
+        "n": 10
+      }
+    },
+    "isoweek": {
+      "pairs": 10,
+      "ratio": {
+        "mean": 0.40246842529191984,
+        "min": 0.21727748691099477,
+        "max": 0.4742857142857143,
+        "n": 10
+      },
+      "first_completion": {
+        "mean": 453.0,
+        "min": 350,
+        "max": 764,
+        "n": 10
+      },
+      "second_completion": {
+        "mean": 166.0,
+        "min": 166,
+        "max": 166,
+        "n": 10
+      }
+    },
+    "isin": {
+      "pairs": 10,
+      "ratio": {
+        "mean": 0.2678593659804359,
+        "min": 0.14613778705636743,
+        "max": 0.6161616161616161,
+        "n": 10
+      },
+      "first_completion": {
+        "mean": 987.9,
+        "min": 599,
+        "max": 1437,
+        "n": 10
+      },
+      "second_completion": {
+        "mean": 250.0,
+        "min": 210,
+        "max": 610,
+        "n": 10
+      }
+    },
+    "sessions": {
+      "pairs": 10,
+      "ratio": {
+        "mean": 0.7818824819223915,
+        "min": 0.7149587750294464,
+        "max": 0.8451807228915663,
+        "n": 10
+      },
+      "first_completion": {
+        "mean": 1648.1,
+        "min": 1537,
+        "max": 1698,
+        "n": 10
+      },
+      "second_completion": {
+        "mean": 1288.4,
+        "min": 1202,
+        "max": 1403,
+        "n": 10
+      }
+    }
+  },
+  "conditions": {
+    "tools": {
+      "runs": 80,
+      "solved": 80,
+      "accuracy": 1.0,
+      "prompt": {
+        "mean": 7795.0375,
+        "min": 2492,
+        "max": 19915,
+        "n": 80
+      },
+      "completion": {
+        "mean": 696.675,
+        "min": 138,
+        "max": 1698,
+        "n": 80
+      },
+      "rounds": {
+        "mean": 4.6625,
+        "min": 2,
+        "max": 8,
+        "n": 80
+      },
+      "cost_usd": 0.67670475
+    },
+    "baseline": {
+      "runs": 80,
+      "solved": 66,
+      "accuracy": 0.825,
+      "prompt": {
+        "mean": 12658.95,
+        "min": 622,
+        "max": 34245,
+        "n": 80
+      },
+      "completion": {
+        "mean": 2916.4,
+        "min": 100,
+        "max": 5875,
+        "n": 80
+      },
+      "rounds": {
+        "mean": 6.675,
+        "min": 1,
+        "max": 10,
+        "n": 80
+      },
+      "cost_usd": 1.6344569999999998
+    }
+  },
+  "failures": [
+    {
+      "run_id": "core__baseline__gstin_1__r02",
+      "task": "gstin_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "KXMS",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__gstin_1__r05",
+      "task": "gstin_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "KXMS",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__gstin_2__r01",
+      "task": "gstin_2",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "HXOW",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__gstin_2__r04",
+      "task": "gstin_2",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "HXOW",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__isoweek_1__r01",
+      "task": "isoweek_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__isoweek_1__r02",
+      "task": "isoweek_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__isoweek_1__r04",
+      "task": "isoweek_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__isoweek_1__r05",
+      "task": "isoweek_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__isoweek_1__r06",
+      "task": "isoweek_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "core__baseline__isoweek_1__r09",
+      "task": "isoweek_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "finance__baseline__isin_1__r03",
+      "task": "isin_1",
+      "condition": "baseline",
+      "status": "wrong",
+      "answer": "810566",
+      "expected": "071522",
+      "rounds": 9,
+      "refusals": {},
+      "note": ""
+    },
+    {
+      "run_id": "finance__baseline__isin_1__r05",
+      "task": "isin_1",
+      "condition": "baseline",
+      "status": "wrong",
+      "answer": "019517",
+      "expected": "071522",
+      "rounds": 10,
+      "refusals": {},
+      "note": ""
+    },
+    {
+      "run_id": "finance__baseline__isin_1__r08",
+      "task": "isin_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "071522",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    },
+    {
+      "run_id": "finance__baseline__isin_1__r09",
+      "task": "isin_1",
+      "condition": "baseline",
+      "status": "unfinished",
+      "answer": null,
+      "expected": "071522",
+      "rounds": 10,
+      "refusals": {},
+      "note": "ran out of rounds"
+    }
+  ]
+}

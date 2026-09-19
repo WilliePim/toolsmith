@@ -1,0 +1,78 @@
+{
+  "name": "nth_trading_session",
+  "description": "Returns the nth trading session date strictly after start date (excluding weekends and closures) in YYYY-MM-DD format.",
+  "parameters": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "start",
+      "n",
+      "closures"
+    ],
+    "properties": {
+      "start": {
+        "type": "string",
+        "description": "the start date, YYYY-MM-DD"
+      },
+      "n": {
+        "type": "integer",
+        "description": "which session after the start"
+      },
+      "closures": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "the market holidays, each YYYY-MM-DD"
+      }
+    }
+  },
+  "set": "finance",
+  "family": "sessions",
+  "joiner": ",",
+  "tests": [
+    {
+      "expect": "2025-03-12",
+      "args": {
+        "n": 3,
+        "start": "2025-03-07",
+        "closures": [
+          "2025-01-01",
+          "2025-01-09",
+          "2025-01-20",
+          "2025-02-17",
+          "2025-04-18",
+          "2025-05-26",
+          "2025-06-19",
+          "2025-07-04",
+          "2025-09-01",
+          "2025-11-27",
+          "2025-12-25"
+        ]
+      }
+    },
+    {
+      "args": {
+        "n": 1,
+        "closures": [
+          "2025-01-01",
+          "2025-01-09",
+          "2025-01-20",
+          "2025-02-17",
+          "2025-04-18",
+          "2025-05-26",
+          "2025-06-19",
+          "2025-07-04",
+          "2025-09-01",
+          "2025-11-27",
+          "2025-12-25"
+        ],
+        "start": "2025-01-08"
+      },
+      "expect": "2025-01-10"
+    }
+  ],
+  "created": "2026-09-19T17:15:19+00:00",
+  "uses": 12,
+  "sha256": "378f5ae1decb385b9e619ef67e583c2a51275f1f3a1c0a271e1d535c8491edc5"
+}

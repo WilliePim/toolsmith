@@ -12,6 +12,7 @@ model can repair.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Sequence
 
@@ -40,6 +41,7 @@ class RunResult:
     note: str = ""
     refusals: dict[str, int] = field(default_factory=dict)   # stage -> count
     write_attempts: int = 0
+    trace: list[str] = field(default_factory=list)   # what the live log showed
 
     @property
     def correct(self) -> bool:
@@ -89,12 +91,12 @@ class Agent:
             result.completion_tokens += completion.completion_tokens
 
             if not completion.ok:
-                self._log(round_no, f"[red]model error[/]: {completion.error}")
+                self._log(round_no, f"[red]model error[/]: {completion.error}", result)
                 result.status, result.note = "stopped", completion.error
                 return result
 
             if completion.text:
-                self._log(round_no, f"[dim]{completion.text[:200]}[/]")
+                self._log(round_no, f"[dim]{completion.text[:200]}[/]", result)
             messages.append(llm.assistant_message(completion))
 
             if not completion.tool_calls:
@@ -110,7 +112,7 @@ class Agent:
             messages.extend(llm.tool_results_message(results, note=note))
 
         result.status, result.note = "unfinished", "ran out of rounds"
-        self._log(config.MAX_ROUNDS, "[red]out of rounds[/]")
+        self._log(config.MAX_ROUNDS, "[red]out of rounds[/]", result)
         return result
 
     def _handle(self, calls: Sequence[ToolCall], task: Task, result: RunResult,
@@ -126,7 +128,10 @@ class Agent:
             elif call.name in self.registry:
                 out.append(self._call_generated(call, result))
             elif call.name in tools.FIXED:
-                out.append(ToolResult(call, tools.call(call.name, call.args)))
+                text = tools.call(call.name, call.args)
+                self._log(result.rounds,
+                          f"{call.name}({_short(call.args)}) -> {text[:60]!r}", result)
+                out.append(ToolResult(call, text))
             else:
                 out.append(ToolResult(call, f"ERROR: no tool called {call.name!r}.",
                                       is_error=True))
@@ -153,7 +158,7 @@ class Agent:
             # Show the reason, not just the stage: the model is told why, and so
             # should anyone watching the run.
             verb = f"[yellow]refused ({forged.stage})[/] {forged.message[:110]}"
-        self._log(result.rounds, f"write_tool {spec.name!r}: {verb}")
+        self._log(result.rounds, f"write_tool {spec.name!r}: {verb}", result)
         if forged.ok:
             result.tools_written.append(spec.name)
         else:
@@ -166,9 +171,9 @@ class Agent:
         result.tools_used.append(call.name)
         first = run.results[0] if run.results else {"ok": False, "error": run.detail}
         if first.get("ok"):
-            self._log(result.rounds, f"{call.name}({_short(call.args)}) -> {first['value']!r}")
+            self._log(result.rounds, f"{call.name}({_short(call.args)}) -> {first['value']!r}", result)
             return ToolResult(call, _truncate(str(first["value"])))
-        self._log(result.rounds, f"{call.name}({_short(call.args)}) -> [red]{first.get('error')}[/]")
+        self._log(result.rounds, f"{call.name}({_short(call.args)}) -> [red]{first.get('error')}[/]", result)
         return ToolResult(call, f"ERROR: {first.get('error')}", is_error=True)
 
     def _finish(self, result: RunResult, answer: str) -> RunResult:
@@ -176,7 +181,7 @@ class Agent:
         result.status = "solved" if answer == result.expected else "wrong"
         colour = "green" if result.correct else "red"
         self._log(result.rounds, f"submit_answer -> {answer!r} "
-                                 f"[{colour}]{'correct' if result.correct else 'wrong'}[/]")
+                                 f"[{colour}]{'correct' if result.correct else 'wrong'}[/]", result)
         return result
 
     def _steer(self, round_no: int, writes_left: int) -> str:
@@ -186,8 +191,13 @@ class Agent:
             return prompts.ROUNDS_LOW
         return prompts.NUDGE
 
-    def _log(self, round_no: int, message: str) -> None:
+    def _log(self, round_no: int, message: str, result: RunResult | None = None) -> None:
         self.console.print(f"  [dim]r{round_no}[/] {message}")
+        if result is not None:
+            # Keep the same line, without the colour markup, so a saved run can be
+            # read back as the transcript a person actually watched.
+            plain = re.sub(r"\[/?[a-z ]*\]", "", message)
+            result.trace.append(f"r{round_no} {plain}")
 
 
 def _truncate(text: str) -> str:

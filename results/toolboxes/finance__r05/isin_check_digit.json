@@ -1,0 +1,37 @@
+{
+  "name": "isin_check_digit",
+  "description": "Calculates the ISIN check digit for an 11-character prefix",
+  "parameters": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "prefix"
+    ],
+    "properties": {
+      "prefix": {
+        "type": "string",
+        "description": "the first 11 characters of an ISIN"
+      }
+    }
+  },
+  "set": "finance",
+  "family": "isin",
+  "joiner": "",
+  "tests": [
+    {
+      "expect": "5",
+      "args": {
+        "prefix": "US037833100"
+      }
+    },
+    {
+      "args": {
+        "prefix": "US037833100"
+      },
+      "expect": "5"
+    }
+  ],
+  "created": "2026-09-19T17:32:30+00:00",
+  "uses": 13,
+  "sha256": "b23f1b64019b5a8d3dea553617a9b94dda4760638801a20fd4628df6386a17cb"
+}

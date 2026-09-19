@@ -1,0 +1,78 @@
+{
+  "name": "nth_trading_session",
+  "description": "Calculates the date of the nth trading session strictly after a start date given a list of market closures.",
+  "parameters": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "start",
+      "n",
+      "closures"
+    ],
+    "properties": {
+      "start": {
+        "type": "string",
+        "description": "the start date, YYYY-MM-DD"
+      },
+      "n": {
+        "type": "integer",
+        "description": "which session after the start"
+      },
+      "closures": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "the market holidays, each YYYY-MM-DD"
+      }
+    }
+  },
+  "set": "finance",
+  "family": "sessions",
+  "joiner": ",",
+  "tests": [
+    {
+      "args": {
+        "start": "2025-03-07",
+        "closures": [
+          "2025-01-01",
+          "2025-01-09",
+          "2025-01-20",
+          "2025-02-17",
+          "2025-04-18",
+          "2025-05-26",
+          "2025-06-19",
+          "2025-07-04",
+          "2025-09-01",
+          "2025-11-27",
+          "2025-12-25"
+        ],
+        "n": 3
+      },
+      "expect": "2025-03-12"
+    },
+    {
+      "expect": "2025-01-10",
+      "args": {
+        "start": "2025-01-08",
+        "n": 1,
+        "closures": [
+          "2025-01-01",
+          "2025-01-09",
+          "2025-01-20",
+          "2025-02-17",
+          "2025-04-18",
+          "2025-05-26",
+          "2025-06-19",
+          "2025-07-04",
+          "2025-09-01",
+          "2025-11-27",
+          "2025-12-25"
+        ]
+      }
+    }
+  ],
+  "created": "2026-09-19T17:23:38+00:00",
+  "uses": 13,
+  "sha256": "294cbdd9e6b5c002aa2809c4961a7967d5caf737bfd7798bc168f15821f74a04"
+}

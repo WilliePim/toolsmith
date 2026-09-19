@@ -132,6 +132,7 @@ async def one_run(task, task_set: TaskSet, registry: Registry | None, condition:
             "refusals": result.refusals, "write_attempts": result.write_attempts,
             "repaired": result.repaired,
             "note": result.note,
+            "trace": result.trace,
             "api_retries": api_retries,
             "api_error": result.api_error,
             "tokens_lost_to_api_errors": {"prompt": wasted_prompt,

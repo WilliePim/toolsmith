@@ -23,6 +23,7 @@ A tool the model writes goes through four gates before it can be called:
 > `uv run python -m src.bench --repeats 10 && uv run python -m src.report`.
 
 <!-- GENERATED:bench-header:START -->
+Model **gemini-3.8-flash**, temperature *provider default (unset)*, commit `f292c9f+dirty`, run on 2026-09-19. 10 repetitions per task per condition: 160 runs, 289,046 output tokens, $2.31 total. Provider errors retried: 0. 5 out-of-design runs, collected afterwards to capture a transcript, are excluded from every average.
 <!-- GENERATED:bench-header:END -->
 
 ## What it looks like
@@ -74,8 +75,8 @@ Only the tool-writing lines are removed; the opening and the closing instruction
 <!-- GENERATED:bench-conditions:START -->
 | condition | runs | solved | accuracy | in tokens (mean) | out tokens (mean) | total cost (USD) |
 |---|---|---|---|---|---|---|
-| tools | 8 | 8 | 100% | 8,648 | 652 | $0.07 |
-| baseline | 8 | 6 | 75% | 12,489 | 2,692 | $0.16 |
+| tools | 80 | 80 | 100% | 7,795 | 697 | $0.68 |
+| baseline | 80 | 66 | 82% | 12,659 | 2,916 | $1.63 |
 <!-- GENERATED:bench-conditions:END -->
 
 ### Reuse: what the second task of a family costs
@@ -85,35 +86,62 @@ Measured per repetition, then reported as a mean and a range — a single pair i
 anecdote.
 
 <!-- GENERATED:bench-reuse:START -->
-| family | pairs | first task out tokens (mean) | second task (mean) | saving, mean | saving, range |
-|---|---|---|---|---|---|
-| gstin | 1 | 424 | 197 | 1/2.2 | 1/2.2 - 1/2.2 |
-| isin | 1 | 1,106 | 210 | 1/5.3 | 1/5.3 - 1/5.3 |
-| isoweek | 1 | 352 | 166 | 1/2.1 | 1/2.1 - 1/2.1 |
-| sessions | 1 | 1,549 | 1,214 | 1/1.3 | 1/1.3 - 1/1.3 |
+| family | pairs | first task out tokens (mean) | second task (mean) | saving, mean | worst pair | best pair |
+|---|---|---|---|---|---|---|
+| gstin | 10 | 508 | 272 | 1.8x fewer | 1.4x more | 3.3x fewer |
+| isin | 10 | 988 | 250 | 3.7x fewer | 1.6x fewer | 6.8x fewer |
+| isoweek | 10 | 453 | 166 | 2.5x fewer | 2.1x fewer | 4.6x fewer |
+| sessions | 10 | 1,648 | 1,288 | 1.3x fewer | 1.2x fewer | 1.4x fewer |
 <!-- GENERATED:bench-reuse:END -->
+
+Reuse is not free money, and the table says so: for `sessions` the saving is slight,
+because every call still carries the exchange's holiday list, and for `gstin` at least
+one repetition spent *more* on the second task than on the first. What holds across all
+four families is the accuracy, not a fixed discount.
+
+### Where the four gates actually fired
+
+A tool is only registered after the guard reads it and the sandbox runs it against
+inputs the model never sees. This is how often that refused something during these runs:
+
+Read that table strictly. The refusals came from the model's *own* tests and from the
+spec check, and **the held-out check never had to reject a tool in these 160 runs** — it
+ran every time and passed every time. Its value is therefore demonstrated by
+construction, not by these runs: `uv run python -m src.smith` builds a deliberately wrong
+GSTIN tool that passes its own tests and shows the held-out check catching it, revealing
+only a count and a hint. A run where a model writes such a tool by itself is not in this
+sample.
+
+<!-- GENERATED:bench-refusals:START -->
+| gate that refused a tool | times |
+|---|---|
+| own_tests | 3 |
+| tests | 2 |
+
+45 tool-writing attempts in total; 5 were refused and 3 run(s) went on to register a repaired tool.
+<!-- GENERATED:bench-refusals:END -->
 
 ### Per task
 
 <!-- GENERATED:bench-tasks:START -->
 | task | condition | runs | solved | tool refused | repaired | rounds (mean) | out tokens mean (min-max) |
 |---|---|---|---|---|---|---|---|
-| gstin_1 | baseline | 1 | 1/1 | 0 | 0 | 8.0 | 4,980 (4,980-4,980) |
-| gstin_2 | baseline | 1 | 0/1 | 0 | 0 | 10.0 | 4,421 (4,421-4,421) |
-| isoweek_1 | baseline | 1 | 0/1 | 0 | 0 | 10.0 | 445 (445-445) |
-| isoweek_2 | baseline | 1 | 1/1 | 0 | 0 | 9.0 | 267 (267-267) |
-| isin_1 | baseline | 1 | 1/1 | 0 | 0 | 8.0 | 3,163 (3,163-3,163) |
-| isin_2 | baseline | 1 | 1/1 | 0 | 0 | 9.0 | 3,177 (3,177-3,177) |
-| sessions_1 | baseline | 1 | 1/1 | 0 | 0 | 1.0 | 2,907 (2,907-2,907) |
-| sessions_2 | baseline | 1 | 1/1 | 0 | 0 | 1.0 | 2,178 (2,178-2,178) |
-| gstin_1 | tools | 1 | 1/1 | 0 | 0 | 6.0 | 424 (424-424) |
-| gstin_2 | tools | 1 | 1/1 | 0 | 0 | 3.0 | 197 (197-197) |
-| isoweek_1 | tools | 1 | 1/1 | 0 | 0 | 3.0 | 352 (352-352) |
-| isoweek_2 | tools | 1 | 1/1 | 0 | 0 | 2.0 | 166 (166-166) |
-| isin_1 | tools | 1 | 1/1 | 0 | 0 | 3.0 | 1,106 (1,106-1,106) |
-| isin_2 | tools | 1 | 1/1 | 0 | 0 | 8.0 | 210 (210-210) |
-| sessions_1 | tools | 1 | 1/1 | 0 | 0 | 8.0 | 1,549 (1,549-1,549) |
-| sessions_2 | tools | 1 | 1/1 | 0 | 0 | 7.0 | 1,214 (1,214-1,214) |
+| gstin_1 | baseline | 10 | 8/10 | 0 | 0 | 8.8 | 4,292 (982-5,266) |
+| gstin_2 | baseline | 10 | 8/10 | 0 | 0 | 9.8 | 4,780 (1,961-5,875) |
+| isoweek_1 | baseline | 10 | 4/10 | 0 | 0 | 8.8 | 895 (289-3,079) |
+| isoweek_2 | baseline | 10 | 10/10 | 0 | 0 | 6.3 | 1,624 (100-4,099) |
+| isin_1 | baseline | 10 | 6/10 | 0 | 0 | 8.9 | 2,286 (385-5,185) |
+| isin_2 | baseline | 10 | 10/10 | 0 | 0 | 8.3 | 3,680 (3,064-5,115) |
+| sessions_1 | baseline | 10 | 10/10 | 0 | 0 | 1.2 | 2,890 (2,404-3,266) |
+| sessions_2 | baseline | 10 | 10/10 | 0 | 0 | 1.3 | 2,885 (2,178-3,924) |
+| gstin_1 | tools | 10 | 10/10 | 0 | 0 | 4.2 | 508 (400-990) |
+| gstin_2 | tools | 10 | 10/10 | 0 | 0 | 5.1 | 272 (138-606) |
+| isoweek_1 | tools | 10 | 10/10 | 5 | 3 | 4.7 | 453 (350-764) |
+| isoweek_2 | tools | 10 | 10/10 | 0 | 0 | 2.7 | 166 (166-166) |
+| isin_1 | tools | 10 | 10/10 | 0 | 0 | 4.1 | 988 (599-1,437) |
+| isin_2 | tools | 10 | 10/10 | 0 | 0 | 6.5 | 250 (210-610) |
+| sessions_1 | tools | 10 | 10/10 | 0 | 0 | 4.9 | 1,648 (1,537-1,698) |
+| sessions_2 | tools | 10 | 10/10 | 0 | 0 | 5.1 | 1,288 (1,202-1,403) |
 <!-- GENERATED:bench-tasks:END -->
 
 ## Where it fails
@@ -121,11 +149,46 @@ anecdote.
 Failures are listed, not hidden and not re-rolled until they pass. Every run below is
 in `results/runs/` with its full record.
 
+Every failure in these runs is a **baseline** failure, and one transcript explains the
+pattern better than the table. The baseline is not wrong about the method — it computes
+the ISO week correctly — it just spends one whole round per arithmetic step, and runs out
+of rounds before it reaches the answer. A written tool does all four inputs in one round.
+
+<!-- GENERATED:bench-trace:START -->
+`core__baseline__isoweek_1__r14` - isoweek_1, baseline, ended *unfinished* after 10 rounds:
+
+```
+r1 calc(expression='0') -> '0'
+r2 calc(expression='(2027 + 2027//4 - 2027//100 + 2027//400) % 7') -> '5'
+r3 calc(expression='31+28+31+30+31+30+31+7') -> '219'
+r4 calc(expression='(219 + 4) // 7') -> '31'
+r5 calc(expression='(5 + 219 - 1) % 7') -> '6'
+r6 calc(expression='31+28+31+30+31+30+31+31+28') -> '271'
+r7 calc(expression='(271 + 7 - 5) // 7') -> '39'
+r8 calc(expression='31+16') -> '47'
+r9 calc(expression='(47 + 2) // 7') -> '7'
+r10 calc(expression='31+28+31+30+31+11') -> '162'
+r10 out of rounds
+```
+<!-- GENERATED:bench-trace:END -->
+
 <!-- GENERATED:bench-failures:START -->
 | run | task | condition | what happened | answer given |
 |---|---|---|---|---|
+| `core__baseline__gstin_1__r02` | gstin_1 | baseline | unfinished | `-` |
+| `core__baseline__gstin_1__r05` | gstin_1 | baseline | unfinished | `-` |
 | `core__baseline__gstin_2__r01` | gstin_2 | baseline | unfinished | `-` |
+| `core__baseline__gstin_2__r04` | gstin_2 | baseline | unfinished | `-` |
 | `core__baseline__isoweek_1__r01` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r02` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r04` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r05` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r06` | isoweek_1 | baseline | unfinished | `-` |
+| `core__baseline__isoweek_1__r09` | isoweek_1 | baseline | unfinished | `-` |
+| `finance__baseline__isin_1__r03` | isin_1 | baseline | wrong | `810566` |
+| `finance__baseline__isin_1__r05` | isin_1 | baseline | wrong | `019517` |
+| `finance__baseline__isin_1__r08` | isin_1 | baseline | unfinished | `-` |
+| `finance__baseline__isin_1__r09` | isin_1 | baseline | unfinished | `-` |
 <!-- GENERATED:bench-failures:END -->
 
 ## The sandbox, measured

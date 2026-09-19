@@ -1,0 +1,48 @@
+{
+  "run_id": "finance__tools__isin_2__r02",
+  "task_set": "finance",
+  "task": "isin_2",
+  "family": "isin",
+  "condition": "tools",
+  "repetition": 2,
+  "status": "solved",
+  "answer": "051817",
+  "expected": "051817",
+  "correct": true,
+  "rounds": 3,
+  "prompt_tokens": 3784,
+  "completion_tokens": 210,
+  "tools_written": [],
+  "tools_used": [
+    "isin_check_digit",
+    "isin_check_digit",
+    "isin_check_digit",
+    "isin_check_digit",
+    "isin_check_digit",
+    "isin_check_digit",
+    "isin_check_digit"
+  ],
+  "refusals": {},
+  "write_attempts": 0,
+  "repaired": false,
+  "note": "",
+  "api_retries": 0,
+  "api_error": false,
+  "tokens_lost_to_api_errors": {
+    "prompt": 0,
+    "completion": 0
+  },
+  "duration_s": 18.86,
+  "meta": {
+    "model": "gemini-3.8-flash",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "f292c9f+dirty",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-19T16:51:40+00:00"
+  }
+}

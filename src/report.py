@@ -25,6 +25,13 @@ RESULTS_DIR = config.ROOT_DIR / "results"
 RUNS_DIR = RESULTS_DIR / "runs"
 SUMMARY_PATH = RESULTS_DIR / "summary.json"
 
+# The measured design is REPEATS repetitions of every task in every condition.
+# Runs beyond that exist - a few were collected afterwards to capture a failing
+# transcript - and they are deliberately excluded from every aggregate: adding
+# runs to one cell only would tilt the totals toward that task. They are still
+# available as evidence, and the failure transcript may come from one.
+REPEATS = 10
+
 START = "<!-- GENERATED:{name}:START -->"
 END = "<!-- GENERATED:{name}:END -->"
 
@@ -53,8 +60,10 @@ def summarise(runs: list[dict]) -> dict[str, Any]:
     """Everything the documents quote, computed once."""
     # Provider failures are not results about the agent: excluded from accuracy,
     # counted separately so the cost of the exercise stays honest.
-    usable = [r for r in runs if not r.get("api_error")]
-    api_failed = [r for r in runs if r.get("api_error")]
+    in_design = [r for r in runs if r.get("repetition", 1) <= REPEATS]
+    extra = len(runs) - len(in_design)
+    usable = [r for r in in_design if not r.get("api_error")]
+    api_failed = [r for r in in_design if r.get("api_error")]
 
     per_task: dict[str, dict] = {}
     for run in usable:
@@ -145,7 +154,9 @@ def summarise(runs: list[dict]) -> dict[str, Any]:
         "generated": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "meta": meta,
         "totals": {
+            "repeats": REPEATS,
             "runs": len(usable), "api_failed_runs": len(api_failed),
+            "extra_runs_excluded": extra,
             "api_retries": sum(r.get("api_retries", 0) for r in runs),
             "prompt_tokens": sum(r["prompt_tokens"] for r in usable),
             "completion_tokens": sum(r["completion_tokens"] for r in usable),
@@ -179,12 +190,19 @@ def table_per_task(summary: dict, italian: bool) -> str:
     return "\n".join(lines)
 
 
+def _saving(ratio: float, italian: bool) -> str:
+    """A ratio of second-to-first tokens, read as a saving - or as a loss when it is one."""
+    if ratio <= 1:
+        return f"{1 / ratio:.1f}x " + ("in meno" if italian else "fewer")
+    return f"{ratio:.1f}x " + ("in piu" if italian else "more")
+
+
 def table_reuse(summary: dict, italian: bool) -> str:
     head = ("| family | pairs | first task out tokens (mean) | second task (mean) "
-            "| saving, mean | saving, range |") if not italian else \
+            "| saving, mean | worst pair | best pair |") if not italian else \
            ("| famiglia | coppie | token out primo task (media) | secondo (media) "
-            "| risparmio medio | intervallo |")
-    lines = [head, "|---|---|---|---|---|---|"]
+            "| risparmio medio | coppia peggiore | coppia migliore |")
+    lines = [head, "|---|---|---|---|---|---|---|"]
     for family, r in sorted(summary["reuse"].items()):
         ratio = r["ratio"]
         if not ratio["n"]:
@@ -192,9 +210,36 @@ def table_reuse(summary: dict, italian: bool) -> str:
         lines.append(
             f"| {family} | {r['pairs']} | {r['first_completion']['mean']:,.0f} | "
             f"{r['second_completion']['mean']:,.0f} | "
-            f"1/{1 / ratio['mean']:.1f} | "
-            f"1/{1 / ratio['max']:.1f} - 1/{1 / ratio['min']:.1f} |")
+            f"{_saving(ratio['mean'], italian)} | "
+            f"{_saving(ratio['max'], italian)} | {_saving(ratio['min'], italian)} |")
     return "\n".join(lines)
+
+
+def table_refusals(summary: dict, italian: bool) -> str:
+    """Where the four gates actually fired across every run of the tools condition."""
+    stages: dict[str, int] = defaultdict(int)
+    repaired = written = 0
+    for t in summary["tasks"]:
+        if t["condition"] != "tools":
+            continue
+        for stage, count in t["refusal_stages"].items():
+            stages[stage] += count
+        repaired += t["repaired"]
+        written += t["write_attempts"]
+    if not stages:
+        return ("_No tool was refused in these runs._" if not italian
+                else "_Nessuno strumento e stato respinto in queste esecuzioni._")
+    head = ("| gate that refused a tool | times |" if not italian
+            else "| cancello che ha respinto uno strumento | volte |")
+    lines = [head, "|---|---|"]
+    for stage, count in sorted(stages.items(), key=lambda kv: -kv[1]):
+        lines.append(f"| {stage} | {count} |")
+    tail = (f"\n\n{written} tool-writing attempts in total; {sum(stages.values())} were "
+            f"refused and {repaired} run(s) went on to register a repaired tool."
+            if not italian else
+            f"\n\n{written} tentativi di scrittura in totale; {sum(stages.values())} "
+            f"respinti e {repaired} esecuzioni hanno poi registrato uno strumento riparato.")
+    return "\n".join(lines) + tail
 
 
 def table_conditions(summary: dict, italian: bool) -> str:
@@ -226,6 +271,23 @@ def table_failures(summary: dict, italian: bool) -> str:
         lines.append(f"| `{f['run_id']}` | {f['task']} | {f['condition']} | {what} "
                      f"| `{answer}` |")
     return "\n".join(lines)
+
+
+def failure_trace(runs: list[dict], italian: bool) -> str:
+    """One real failing run, shown as the transcript a person would have watched."""
+    candidates = [r for r in runs if not r.get("api_error") and r.get("trace")
+                  and r["status"] != "solved"]
+    if not candidates:
+        return ("_No failing run has a saved transcript yet._" if not italian else
+                "_Nessuna esecuzione fallita ha ancora una traccia salvata._")
+    # The longest transcript shows the most about how the run went wrong.
+    run = max(candidates, key=lambda r: len(r["trace"]))
+    lines = "\n".join(run["trace"])
+    intro = (f"`{run['run_id']}` - {run['task']}, {run['condition']}, ended "
+             f"*{run['status']}* after {run['rounds']} rounds:" if not italian else
+             f"`{run['run_id']}` - {run['task']}, {run['condition']}, finita "
+             f"*{run['status']}* dopo {run['rounds']} round:")
+    return f"{intro}\n\n```\n{lines}\n```"
 
 
 def table_sandbox(italian: bool) -> str:
@@ -275,19 +337,26 @@ def prompt_diff(italian: bool) -> str:
 
 def header_line(summary: dict, italian: bool) -> str:
     meta, totals = summary["meta"], summary["totals"]
+    extra = totals.get("extra_runs_excluded", 0)
     if italian:
+        note = (f" Escluse dalle medie {extra} esecuzioni fuori disegno, raccolte dopo "
+                f"per catturare una traccia." if extra else "")
         return (f"Modello **{meta.get('model', '?')}**, temperatura "
                 f"*{meta.get('temperature', '?')}*, commit `{meta.get('commit', '?')}`, "
                 f"eseguito il {summary['generated'][:10]}. "
+                f"{totals['repeats']} ripetizioni per compito e condizione: "
                 f"{totals['runs']} esecuzioni, {totals['completion_tokens']:,} token in "
                 f"uscita, costo totale ${totals['cost_usd']:.2f}. "
-                f"Errori del provider rilanciati: {totals['api_retries']}.")
+                f"Errori del provider rilanciati: {totals['api_retries']}.{note}")
+    note = (f" {extra} out-of-design runs, collected afterwards to capture a transcript, "
+            f"are excluded from every average." if extra else "")
     return (f"Model **{meta.get('model', '?')}**, temperature "
             f"*{meta.get('temperature', '?')}*, commit `{meta.get('commit', '?')}`, "
             f"run on {summary['generated'][:10]}. "
+            f"{totals['repeats']} repetitions per task per condition: "
             f"{totals['runs']} runs, {totals['completion_tokens']:,} output tokens, "
             f"${totals['cost_usd']:.2f} total. "
-            f"Provider errors retried: {totals['api_retries']}.")
+            f"Provider errors retried: {totals['api_retries']}.{note}")
 
 
 def inject(path: Path, name: str, body: str) -> bool:
@@ -321,6 +390,8 @@ def main() -> int:
         "bench-failures": (table_failures(summary, False), table_failures(summary, True)),
         "sandbox": (table_sandbox(False), table_sandbox(True)),
         "prompt-diff": (prompt_diff(False), prompt_diff(True)),
+        "bench-refusals": (table_refusals(summary, False), table_refusals(summary, True)),
+        "bench-trace": (failure_trace(runs, False), failure_trace(runs, True)),
     }
     changed = []
     for name, (english, italian) in blocks.items():

@@ -1,0 +1,12 @@
+# Secrets and local environment
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Tools the agent writes - regenerated on every demo
+generated/*.py
+generated/*.json
+
+# Reference material, not part of the project
+/Agent that writes it's own tools.pdf

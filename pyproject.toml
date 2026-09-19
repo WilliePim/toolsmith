@@ -1,0 +1,11 @@
+[project]
+name = "toolsmith"
+version = "0.1.0"
+description = "An agent that writes, checks and registers its own tools"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.7.0",
+    "google-genai>=2.24.0",
+    "python-dotenv>=1.2.3",
+    "rich>=15.0.0",
+]

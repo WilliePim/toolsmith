@@ -1,0 +1,222 @@
+{
+  "set": "core",
+  "generated_by": "src/taskgen.py",
+  "families": [
+    {
+      "family": "gstin",
+      "label": "GSTIN check character",
+      "contract": "A GSTIN is 15 characters long. The last one is a check character derived from the first 14 by the standard GSTIN checksum: each character is read as a base-36 digit (0-9 then A-Z), weighted alternately by 1 and 2 starting with 1 at the first character, and the digits of each weighted product are folded back modulo 36. You are given several prefixes and must return every check character, in the order the prefixes are given, with nothing between them. As a worked example, 22AAAAA0000A1Z, 07AABCS1429B1Z give \"CW\".",
+      "returns": "the check characters in order, joined into one string with nothing between them",
+      "tool_params": {
+        "prefix": {
+          "type": "string",
+          "description": "the first 14 characters of a GSTIN"
+        }
+      },
+      "tool_returns": "the check character for that prefix, as a one-character string",
+      "joiner": "",
+      "holdout_hint": "some of them have a check character that is a digit rather than a letter",
+      "tasks": [
+        {
+          "id": "gstin_1",
+          "prompt": "A GSTIN is 15 characters long. The last one is a check character derived from the first 14 by the standard GSTIN checksum: each character is read as a base-36 digit (0-9 then A-Z), weighted alternately by 1 and 2 starting with 1 at the first character, and the digits of each weighted product are folded back modulo 36. You are given several prefixes and must return every check character, in the order the prefixes are given, with nothing between them. As a worked example, 22AAAAA0000A1Z, 07AABCS1429B1Z give \"CW\".\n\nWhat are the check characters for these GSTIN prefixes: 16TEUYJ4263R1Z, 14ELRKY8914Q4Z, 03ZPVMA6122X3Z, 07RJXDS8075B1Z?\n\nAnswer with the check characters in order, joined into one string with nothing between them.",
+          "calls": [
+            {
+              "prefix": "16TEUYJ4263R1Z"
+            },
+            {
+              "prefix": "14ELRKY8914Q4Z"
+            },
+            {
+              "prefix": "03ZPVMA6122X3Z"
+            },
+            {
+              "prefix": "07RJXDS8075B1Z"
+            }
+          ],
+          "answer": "KXMS"
+        },
+        {
+          "id": "gstin_2",
+          "prompt": "A GSTIN is 15 characters long. The last one is a check character derived from the first 14 by the standard GSTIN checksum: each character is read as a base-36 digit (0-9 then A-Z), weighted alternately by 1 and 2 starting with 1 at the first character, and the digits of each weighted product are folded back modulo 36. You are given several prefixes and must return every check character, in the order the prefixes are given, with nothing between them. As a worked example, 22AAAAA0000A1Z, 07AABCS1429B1Z give \"CW\".\n\nWhat are the check characters for these GSTIN prefixes: 20WQZXJ8318D9Z, 24DFWIE8226P5Z, 03GZLTU0394X6Z, 04XNGGX6100F9Z?\n\nAnswer with the check characters in order, joined into one string with nothing between them.",
+          "calls": [
+            {
+              "prefix": "20WQZXJ8318D9Z"
+            },
+            {
+              "prefix": "24DFWIE8226P5Z"
+            },
+            {
+              "prefix": "03GZLTU0394X6Z"
+            },
+            {
+              "prefix": "04XNGGX6100F9Z"
+            }
+          ],
+          "answer": "HXOW"
+        }
+      ],
+      "holdout": [
+        {
+          "calls": [
+            {
+              "prefix": "24CLNCG1262U4Z"
+            },
+            {
+              "prefix": "34JCEJX1964O3Z"
+            },
+            {
+              "prefix": "27EGUFV5022I1Z"
+            },
+            {
+              "prefix": "18DLUOR6733H3Z"
+            }
+          ],
+          "expect": "6YA9"
+        },
+        {
+          "calls": [
+            {
+              "prefix": "37ZRDRH3037I9Z"
+            },
+            {
+              "prefix": "18QOMTM5715S5Z"
+            },
+            {
+              "prefix": "18FJMUR8543C3Z"
+            },
+            {
+              "prefix": "10IWCLM3463D1Z"
+            }
+          ],
+          "expect": "W8D4"
+        },
+        {
+          "calls": [
+            {
+              "prefix": "11DHCCU2574L3Z"
+            },
+            {
+              "prefix": "36RFCFF4677N4Z"
+            },
+            {
+              "prefix": "35QWSLP8806R7Z"
+            },
+            {
+              "prefix": "09UYTVJ7842B2Z"
+            }
+          ],
+          "expect": "S2X5"
+        }
+      ]
+    },
+    {
+      "family": "isoweek",
+      "label": "ISO week label",
+      "contract": "An ISO week label has the form YYYY-Www-D: the ISO week-numbering year, the letter W, the two-digit ISO week number, and the ISO weekday number, 1 for Monday to 7 for Sunday. ISO weeks start on Monday, week 1 is the week that holds the year's first Thursday, and the year in the label is the year its week belongs to. You are given several dates and must return every label, in the order the dates are given, separated by commas with no spaces. As a worked example, 2025-03-17, 2024-07-04 give \"2025-W12-1,2024-W27-4\".",
+      "returns": "the labels in order, separated by commas with no spaces",
+      "tool_params": {
+        "date": {
+          "type": "string",
+          "description": "a date as YYYY-MM-DD"
+        }
+      },
+      "tool_returns": "the ISO week label for that date, such as 2025-W12-1",
+      "joiner": ",",
+      "holdout_hint": "some of them fall within a few days of a year boundary",
+      "tasks": [
+        {
+          "id": "isoweek_1",
+          "prompt": "An ISO week label has the form YYYY-Www-D: the ISO week-numbering year, the letter W, the two-digit ISO week number, and the ISO weekday number, 1 for Monday to 7 for Sunday. ISO weeks start on Monday, week 1 is the week that holds the year's first Thursday, and the year in the label is the year its week belongs to. You are given several dates and must return every label, in the order the dates are given, separated by commas with no spaces. As a worked example, 2025-03-17, 2024-07-04 give \"2025-W12-1,2024-W27-4\".\n\nWhat are the ISO week labels for these dates: 2027-08-07, 2029-09-28, 2029-02-16, 2029-06-11?\n\nAnswer with the labels in order, separated by commas with no spaces.",
+          "calls": [
+            {
+              "date": "2027-08-07"
+            },
+            {
+              "date": "2029-09-28"
+            },
+            {
+              "date": "2029-02-16"
+            },
+            {
+              "date": "2029-06-11"
+            }
+          ],
+          "answer": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1"
+        },
+        {
+          "id": "isoweek_2",
+          "prompt": "An ISO week label has the form YYYY-Www-D: the ISO week-numbering year, the letter W, the two-digit ISO week number, and the ISO weekday number, 1 for Monday to 7 for Sunday. ISO weeks start on Monday, week 1 is the week that holds the year's first Thursday, and the year in the label is the year its week belongs to. You are given several dates and must return every label, in the order the dates are given, separated by commas with no spaces. As a worked example, 2025-03-17, 2024-07-04 give \"2025-W12-1,2024-W27-4\".\n\nWhat are the ISO week labels for these dates: 2019-05-07, 2025-02-01, 2028-08-07, 2024-04-13?\n\nAnswer with the labels in order, separated by commas with no spaces.",
+          "calls": [
+            {
+              "date": "2019-05-07"
+            },
+            {
+              "date": "2025-02-01"
+            },
+            {
+              "date": "2028-08-07"
+            },
+            {
+              "date": "2024-04-13"
+            }
+          ],
+          "answer": "2019-W19-2,2025-W05-6,2028-W32-1,2024-W15-6"
+        }
+      ],
+      "holdout": [
+        {
+          "calls": [
+            {
+              "date": "2019-03-08"
+            },
+            {
+              "date": "2025-03-10"
+            },
+            {
+              "date": "2023-01-01"
+            },
+            {
+              "date": "2027-01-01"
+            }
+          ],
+          "expect": "2019-W10-5,2025-W11-1,2022-W52-7,2026-W53-5"
+        },
+        {
+          "calls": [
+            {
+              "date": "2024-05-08"
+            },
+            {
+              "date": "2017-01-01"
+            },
+            {
+              "date": "2025-12-31"
+            },
+            {
+              "date": "2018-11-28"
+            }
+          ],
+          "expect": "2024-W19-3,2016-W52-7,2026-W01-3,2018-W48-3"
+        },
+        {
+          "calls": [
+            {
+              "date": "2019-08-14"
+            },
+            {
+              "date": "2022-01-01"
+            },
+            {
+              "date": "2022-08-14"
+            },
+            {
+              "date": "2022-01-02"
+            }
+          ],
+          "expect": "2019-W33-3,2021-W52-6,2022-W32-7,2021-W52-7"
+        }
+      ]
+    }
+  ]
+}

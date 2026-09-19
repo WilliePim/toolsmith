@@ -233,6 +233,46 @@ L'idea acuta qui: gli attacchi al sandbox includono i bersagli della guardia —
 
 Ogni modulo ha un'autoverifica `__main__`, e passano tutte offline insieme alla suite di red-team e ai controlli byte dei due generatori. L'unica cosa che serve una chiave API vera è la demo *dal vivo*: `python -m src.main run ...` con un modello che risolve davvero un compito. Incolla una chiave Gemini in `.env` e gira dall'inizio alla fine.
 
+## Poscritto: l'esecuzione che mi ha corretto
+
+Con la chiave a posto, tutti e otto i compiti sono stati risolti alla prima passata con
+`gemini-3.8-flash` e senza alcuna riparazione. Il che lasciava provato solo offline il
+percorso più interessante: scrivi → rifiutato → ripara. Così ho rifatto `isoweek_1` su
+una fascia più economica (`gemini-3.5-flash-lite`) aspettandomi che inciampasse, sia per
+mostrare il ciclo di riparazione dal vivo, sia per sostenere un'affermazione che avevo
+fatto con sicurezza: che la fascia Lite è una falsa economia, perché un tool rifiutato
+costa un round intero.
+
+La prima corsa ha assecondato l'attesa. La guardia ha rifiutato il tool, il modello l'ha
+riparato, e il compito si è chiuso correttamente in 4 round e 535 token in uscita contro
+i 3 round e 352 di Flash. Affermazione apparentemente confermata.
+
+Poi l'ho rifatta una seconda volta, ed è passata al primo tentativo in 3 round e **356**
+token in uscita — indistinguibile da Flash.
+
+| esecuzione | round | token in uscita |
+|---|---|---|
+| `gemini-3.8-flash` | 3 | 352 |
+| `gemini-3.5-flash-lite`, prima | 4 | 535 |
+| `gemini-3.5-flash-lite`, seconda | 3 | 356 |
+
+**La variabilità tra due esecuzioni dello stesso modello sullo stesso compito era più
+grande della differenza che avevo attribuito alla fascia del modello.** Avevo misurato
+rumore e l'avevo raccontato come segnale. Una singola esecuzione di un sistema stocastico
+non stabilisce nulla; un confronto vero richiede lo stesso compito ripetuto cinque o dieci
+volte per modello, riportato come distribuzione.
+
+Due cose ne sono uscite e vale la pena tenerle. Il ciclo di riparazione è ora dimostrato
+dal vivo, non solo nelle autoverifiche offline. E la traccia dell'esecuzione ora stampa
+*perché* un tool è stato rifiutato, non solo che lo è stato — al modello la motivazione
+era sempre stata data, e va data anche a chi guarda.
+
+Una scoperta minore dalla stessa sessione: `gemini-2.5-flash-lite` compare nell'elenco dei
+modelli ma risponde a una richiesta vera con un 404 che dice ai nuovi account di usare
+qualcosa di più recente. **Elencato non significa disponibile** — e il percorso d'errore
+l'ha gestito esattamente come progettato, fermando la corsa con un messaggio leggibile
+invece di un traceback.
+
 ## Cosa costruire dopo
 
 - Un tetto di memoria su Windows (un Job Object) per pareggiare il limite di spazio di indirizzamento di POSIX.

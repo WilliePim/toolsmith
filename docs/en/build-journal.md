@@ -233,6 +233,43 @@ The sharp idea here: the sandbox attacks include the guard's own targets — `os
 
 Every module has a `__main__` self-check, and they all pass offline together with the red-team suite and both generators' byte checks. The one thing that needs a real API key is the *live* demo: `python -m src.main run ...` with a model actually solving a task. Paste a Gemini key into `.env` and it runs end to end.
 
+## A postscript: the run that corrected me
+
+With a key in place, all eight tasks solved on the first pass with `gemini-3.8-flash`
+and no repairs at all. Which left the most interesting path — write → rejected →
+repair — proven only offline. So I ran `isoweek_1` again on a cheaper tier
+(`gemini-3.5-flash-lite`) expecting it to stumble, both to show the repair loop live
+and to back up a claim I had made confidently: that the Lite tier is a false economy,
+because a rejected tool costs a whole extra round.
+
+The first run obliged. The guard refused the tool, the model repaired it, and the task
+finished correctly in 4 rounds and 535 output tokens against Flash's 3 rounds and 352.
+Claim apparently confirmed.
+
+Then I ran it a second time, and it passed first try in 3 rounds and **356** output
+tokens — indistinguishable from Flash.
+
+| run | rounds | output tokens |
+|---|---|---|
+| `gemini-3.8-flash` | 3 | 352 |
+| `gemini-3.5-flash-lite`, first | 4 | 535 |
+| `gemini-3.5-flash-lite`, second | 3 | 356 |
+
+**The variance between two runs of the same model on the same task was larger than the
+difference I had attributed to the model tier.** I had measured noise and narrated it
+as signal. A single run of a stochastic system establishes nothing; a real comparison
+needs the same task repeated five or ten times per model, reported as a distribution.
+
+Two things came out of it worth keeping. The repair loop is now demonstrated live, not
+just in the offline self-checks. And the run trace now prints *why* a tool was refused,
+not just that it was — the model was always told the reason, and so should anyone
+watching.
+
+A smaller find from the same session: `gemini-2.5-flash-lite` is returned by the models
+listing but answers a real request with a 404 telling new accounts to use something
+newer. **Listed is not the same as available** — and the error path handled it exactly
+as designed, stopping the run with a readable message instead of a traceback.
+
 ## What to build next
 
 - A memory cap on Windows (a Job Object) to match the POSIX address-space limit.

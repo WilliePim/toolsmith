@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-20T13:05:11+00:00",
+  "generated": "2026-09-20T13:39:02+00:00",
   "run_dates": [
     "2026-09-19"
   ],
@@ -19,7 +19,7 @@
     "repeats": 10,
     "runs": 160,
     "api_failed_runs": 0,
-    "extra_runs_excluded": 5,
+    "extra_runs_excluded": 13,
     "api_retries": 0,
     "prompt_tokens": 1636319,
     "completion_tokens": 289046,
@@ -849,5 +849,14 @@
       "refusals": {},
       "note": "ran out of rounds"
     }
-  ]
+  ],
+  "holdout_evidence": {
+    "runs_that_wrote": 48,
+    "write_attempts": 60,
+    "holdout_rejections": 0,
+    "models": [
+      "gemini-3.1-flash-lite",
+      "gemini-3.8-flash"
+    ]
+  }
 }

@@ -38,7 +38,7 @@ può scrivere strumenti.
 <!-- GENERATED:bench-conditions:END -->
 
 <!-- GENERATED:bench-header:START -->
-Modello **gemini-3.8-flash**, temperatura *provider default (unset)*, commit `f292c9f+dirty`, eseguito il 2026-09-19. 10 ripetizioni per compito e condizione: 160 esecuzioni, 289,046 token in uscita, costo totale $2.31. Errori del provider rilanciati: 0. Escluse dalle medie 5 esecuzioni fuori disegno, raccolte dopo per catturare una traccia.
+Modello **gemini-3.8-flash**, temperatura *provider default (unset)*, commit `f292c9f+dirty`, eseguito il 2026-09-19. 10 ripetizioni per compito e condizione: 160 esecuzioni, 289,046 token in uscita, costo totale $2.31. Errori del provider rilanciati: 0. Escluse dalle medie 13 esecuzioni fuori disegno, raccolte dopo per catturare una traccia di fallimento e per cercare un rifiuto dal controllo nascosto.
 <!-- GENERATED:bench-header:END -->
 
 > **Questa è la dimostrazione di un meccanismo, non un benchmark.** Esegue 8 compiti in
@@ -269,14 +269,32 @@ in tutte e quattro le famiglie è l'accuratezza, non uno sconto fisso.
 | il controllo della specifica (test assenti o malformati) | 2 |
 
 45 tentativi di scrittura in totale; 5 respinti e 3 esecuzioni hanno poi registrato uno strumento riparato.
+
+Contando ogni esecuzione su disco, comprese quelle fatte apposta per cercarne uno: **0 rifiuti dal controllo nascosto** su 60 tentativi di scrittura, con 2 modelli (gemini-3.1-flash-lite, gemini-3.8-flash).
 <!-- GENERATED:bench-refusals:END -->
 
 Va letta con rigore: i rifiuti vengono dai test *propri* del modello e dal controllo della
-specifica, e **il controllo su input nascosti non ha mai dovuto respingere uno strumento
-in queste esecuzioni** — ha girato ogni volta e ha approvato ogni volta. Il suo valore è
-quindi dimostrato per costruzione, non da questo campione: `uv run python -m src.smith`
-costruisce uno strumento GSTIN volutamente sbagliato che supera i propri test, e mostra il
-controllo nascosto che lo coglie rivelando solo un conteggio e un indizio.
+specifica. **Il controllo su input nascosti ha girato a ogni registrazione e non ha
+respinto nulla**, e quello zero merita una spiegazione invece di restare una lacuna.
+
+Sono andato a cercare un rifiuto: otto ulteriori esecuzioni di `isoweek_1` col modello più
+debole disponibile sull'account (`gemini-3.1-flash-lite`), ognuna da cassetta vuota. Ha
+respinto strumenti alla guardia, al controllo della specifica e ai propri test — mai al
+controllo nascosto. Il motivo si vede in ciò che ha scritto: **tutti e otto gli strumenti
+chiamano `isocalendar()` e ne prendono l'anno ISO.** La trappola era costruita per
+`f"{d.year}-W{week}"`, che usa l'anno *di calendario*; ma la libreria standard di Python
+restituisce l'anno ISO come primo elemento, quindi qualunque modello che usi la funzione
+ovvia è corretto per costruzione. Lo stesso vale per le altre tre famiglie: `int(c, 36)`
+gestisce bene le lettere ISIN, una stringa-alfabeto gestisce bene le cifre GSTIN, e uno
+strumento a cui passi l'elenco delle festività lo usa.
+
+La conclusione onesta: per queste quattro regole la soluzione idiomatica in Python *è*
+quella corretta, quindi il controllo nascosto è una rete in cui un modello capace cade di
+rado. Coglie le implementazioni fatte a mano — che è esattamente ciò che dimostra
+`uv run python -m src.smith`, costruendo uno strumento GSTIN volutamente sbagliato che
+supera i propri test e guardando il controllo nascosto respingerlo con solo un conteggio e
+un indizio. **Una famiglia in cui la soluzione ovvia sia sottilmente sbagliata metterebbe
+alla prova questo cancello molto più a fondo, ed è la cosa più chiara da costruire dopo.**
 
 ### Per compito
 

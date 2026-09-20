@@ -1,0 +1,57 @@
+{
+  "run_id": "core__tools__isoweek_1__r15",
+  "task_set": "core",
+  "task": "isoweek_1",
+  "family": "isoweek",
+  "condition": "tools",
+  "repetition": 15,
+  "status": "solved",
+  "answer": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+  "expected": "2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+  "correct": true,
+  "rounds": 3,
+  "prompt_tokens": 4213,
+  "completion_tokens": 739,
+  "tools_written": [
+    "iso_week_label"
+  ],
+  "tools_used": [
+    "iso_week_label",
+    "iso_week_label",
+    "iso_week_label",
+    "iso_week_label"
+  ],
+  "refusals": {},
+  "write_attempts": 1,
+  "repaired": false,
+  "note": "",
+  "trace": [
+    "r1 write_tool 'iso_week_label': registered",
+    "r2 I will call `iso_week_label` for each of the dates provided:\n1. `2027-08-07`\n2. `2029-09-28`\n3. `2029-02-16`\n4. `2029-06-11`",
+    "r2 iso_week_label(date='2027-08-07') -> '2027-W31-6'",
+    "r2 iso_week_label(date='2029-09-28') -> '2029-W39-5'",
+    "r2 iso_week_label(date='2029-02-16') -> '2029-W07-5'",
+    "r2 iso_week_label(date='2029-06-11') -> '2029-W24-1'",
+    "r3 I have the four labels:\n- 2027-08-07 -> 2027-W31-6\n- 2029-09-28 -> 2029-W39-5\n- 2029-02-16 -> 2029-W07-5\n- 2029-06-11 -> 2029-W24-1\n\nJoined by commas: 2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1",
+    "r3 submit_answer -> '2027-W31-6,2029-W39-5,2029-W07-5,2029-W24-1' correct"
+  ],
+  "api_retries": 0,
+  "api_error": false,
+  "tokens_lost_to_api_errors": {
+    "prompt": 0,
+    "completion": 0
+  },
+  "duration_s": 16.44,
+  "meta": {
+    "model": "gemini-3.1-flash-lite",
+    "provider": "gemini",
+    "temperature": "provider default (unset)",
+    "thinking": "low",
+    "commit": "f3a955e",
+    "prompt_sha": {
+      "tools": "7f97f6069958",
+      "baseline": "b7fa779dc437"
+    },
+    "started": "2026-09-20T13:34:02+00:00"
+  }
+}

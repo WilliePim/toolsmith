@@ -1,0 +1,37 @@
+{
+  "name": "iso_week_label",
+  "description": "Returns the ISO week label for a given date in YYYY-MM-DD format.",
+  "parameters": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "date"
+    ],
+    "properties": {
+      "date": {
+        "type": "string",
+        "description": "a date as YYYY-MM-DD"
+      }
+    }
+  },
+  "set": "core",
+  "family": "isoweek",
+  "joiner": ",",
+  "tests": [
+    {
+      "expect": "2025-W12-1",
+      "args": {
+        "date": "2025-03-17"
+      }
+    },
+    {
+      "expect": "2024-W27-4",
+      "args": {
+        "date": "2024-07-04"
+      }
+    }
+  ],
+  "created": "2026-09-20T13:35:34+00:00",
+  "uses": 4,
+  "sha256": "b000e7379cbd1519f86780424b9b4e6c2c705b3fb19a6391fc98a18f39c391f5"
+}

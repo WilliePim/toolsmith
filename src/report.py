@@ -56,6 +56,22 @@ def _stats(values: Iterable[float]) -> dict[str, float]:
             "n": len(data)}
 
 
+def holdout_evidence(runs: list[dict]) -> dict[str, Any]:
+    """How often the held-out check rejected a tool, across *every* run on disk.
+
+    Counted over the extra runs too: those exist precisely to hunt for a rejection,
+    so excluding them would hide the search that failed to find one.
+    """
+    written = [r for r in runs if r.get("write_attempts")]
+    return {
+        "runs_that_wrote": len(written),
+        "write_attempts": sum(r.get("write_attempts", 0) for r in written),
+        "holdout_rejections": sum((r.get("refusals") or {}).get("holdout", 0)
+                                  for r in written),
+        "models": sorted({r["meta"].get("model", "?") for r in written if r.get("meta")}),
+    }
+
+
 def summarise(runs: list[dict]) -> dict[str, Any]:
     """Everything the documents quote, computed once."""
     # Provider failures are not results about the agent: excluded from accuracy,
@@ -170,6 +186,7 @@ def summarise(runs: list[dict]) -> dict[str, Any]:
         },
         "tasks": tasks, "reuse": reuse_summary, "conditions": conditions,
         "failures": failures,
+        "holdout_evidence": holdout_evidence(runs),
     }
 
 
@@ -254,11 +271,23 @@ def table_refusals(summary: dict, italian: bool) -> str:
     for stage, count in sorted(stages.items(), key=lambda kv: -kv[1]):
         label = _STAGE_LABELS.get(stage, (stage, stage))[1 if italian else 0]
         lines.append(f"| {label} | {count} |")
-    tail = (f"\n\n{written} tool-writing attempts in total; {sum(stages.values())} were "
-            f"refused and {repaired} run(s) went on to register a repaired tool."
-            if not italian else
-            f"\n\n{written} tentativi di scrittura in totale; {sum(stages.values())} "
-            f"respinti e {repaired} esecuzioni hanno poi registrato uno strumento riparato.")
+    ev = summary.get("holdout_evidence", {})
+    if not italian:
+        tail = (f"\n\n{written} tool-writing attempts in total; {sum(stages.values())} were "
+                f"refused and {repaired} run(s) went on to register a repaired tool.\n\n"
+                f"Counting every run on disk, including the extra ones made hunting for "
+                f"one: **{ev.get('holdout_rejections', 0)} held-out rejections** across "
+                f"{ev.get('write_attempts', 0)} tool-writing attempts, on "
+                f"{len(ev.get('models', []))} model(s) "
+                f"({', '.join(ev.get('models', [])) or 'n/a'}).")
+    else:
+        tail = (f"\n\n{written} tentativi di scrittura in totale; {sum(stages.values())} "
+                f"respinti e {repaired} esecuzioni hanno poi registrato uno strumento "
+                f"riparato.\n\nContando ogni esecuzione su disco, comprese quelle fatte "
+                f"apposta per cercarne uno: **{ev.get('holdout_rejections', 0)} rifiuti "
+                f"dal controllo nascosto** su {ev.get('write_attempts', 0)} tentativi di "
+                f"scrittura, con {len(ev.get('models', []))} modelli "
+                f"({', '.join(ev.get('models', [])) or 'n/d'}).")
     return "\n".join(lines) + tail
 
 
@@ -362,7 +391,8 @@ def header_line(summary: dict, italian: bool) -> str:
     when = days[0] if len(days) == 1 else f"{days[0]} - {days[-1]}"
     if italian:
         note = (f" Escluse dalle medie {extra} esecuzioni fuori disegno, raccolte dopo "
-                f"per catturare una traccia." if extra else "")
+                f"per catturare una traccia di fallimento e per cercare un rifiuto dal "
+                f"controllo nascosto." if extra else "")
         return (f"Modello **{meta.get('model', '?')}**, temperatura "
                 f"*{meta.get('temperature', '?')}*, commit `{meta.get('commit', '?')}`, "
                 f"eseguito il {when}. "
@@ -370,8 +400,9 @@ def header_line(summary: dict, italian: bool) -> str:
                 f"{totals['runs']} esecuzioni, {totals['completion_tokens']:,} token in "
                 f"uscita, costo totale ${totals['cost_usd']:.2f}. "
                 f"Errori del provider rilanciati: {totals['api_retries']}.{note}")
-    note = (f" {extra} out-of-design runs, collected afterwards to capture a transcript, "
-            f"are excluded from every average." if extra else "")
+    note = (f" {extra} out-of-design runs, collected afterwards to capture a failure "
+            f"transcript and to hunt for a held-out rejection, are excluded from every "
+            f"average." if extra else "")
     return (f"Model **{meta.get('model', '?')}**, temperature "
             f"*{meta.get('temperature', '?')}*, commit `{meta.get('commit', '?')}`, "
             f"run on {when}. "

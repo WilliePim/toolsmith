@@ -1,0 +1,37 @@
+{
+  "name": "iso_week_label",
+  "description": "Convert a date string YYYY-MM-DD to an ISO week label YYYY-Www-D.",
+  "parameters": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "date"
+    ],
+    "properties": {
+      "date": {
+        "type": "string",
+        "description": "a date as YYYY-MM-DD"
+      }
+    }
+  },
+  "set": "core",
+  "family": "isoweek",
+  "joiner": ",",
+  "tests": [
+    {
+      "args": {
+        "date": "2025-03-17"
+      },
+      "expect": "2025-W12-1"
+    },
+    {
+      "args": {
+        "date": "2024-07-04"
+      },
+      "expect": "2024-W27-4"
+    }
+  ],
+  "created": "2026-09-20T13:36:39+00:00",
+  "uses": 4,
+  "sha256": "dcc434d926026c69c10fab0d2ba05152998f6bbfd3f63ab454b3a042862991e7"
+}

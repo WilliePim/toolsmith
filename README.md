@@ -37,7 +37,7 @@ may write tools.
 <!-- GENERATED:bench-conditions:END -->
 
 <!-- GENERATED:bench-header:START -->
-Model **gemini-3.8-flash**, temperature *provider default (unset)*, commit `f292c9f+dirty`, run on 2026-09-19. 10 repetitions per task per condition: 160 runs, 289,046 output tokens, $2.31 total. Provider errors retried: 0. 5 out-of-design runs, collected afterwards to capture a transcript, are excluded from every average.
+Model **gemini-3.8-flash**, temperature *provider default (unset)*, commit `f292c9f+dirty`, run on 2026-09-19. 10 repetitions per task per condition: 160 runs, 289,046 output tokens, $2.31 total. Provider errors retried: 0. 13 out-of-design runs, collected afterwards to capture a failure transcript and to hunt for a held-out rejection, are excluded from every average.
 <!-- GENERATED:bench-header:END -->
 
 > **This is a demonstration of a mechanism, not a benchmark.** It runs 8 tasks in 4
@@ -262,14 +262,31 @@ four families is the accuracy, not a fixed discount.
 | the spec check (too few or malformed tests) | 2 |
 
 45 tool-writing attempts in total; 5 were refused and 3 run(s) went on to register a repaired tool.
+
+Counting every run on disk, including the extra ones made hunting for one: **0 held-out rejections** across 60 tool-writing attempts, on 2 model(s) (gemini-3.1-flash-lite, gemini-3.8-flash).
 <!-- GENERATED:bench-refusals:END -->
 
 Read that strictly: the refusals came from the model's *own* tests and from the spec
-check, and **the held-out check never had to reject a tool in these runs** — it ran every
-time and passed every time. Its value is therefore shown by construction rather than by
-this sample: `uv run python -m src.smith` builds a deliberately wrong GSTIN tool that
-passes its own tests, and shows the held-out check catching it with only a count and a
-hint.
+check. **The held-out check ran on every registration and rejected nothing**, and that
+zero is worth explaining rather than leaving as a gap.
+
+I went looking for a rejection: eight further runs of `isoweek_1` on the weakest model
+the account exposes (`gemini-3.1-flash-lite`), each from an empty toolbox. It refused
+tools at the guard, the spec check and its own tests — and never at the held-out check.
+The reason is visible in what it wrote: **all eight tools call `isocalendar()` and take
+the ISO year from it.** The trap was built for `f"{d.year}-W{week}"`, which uses the
+*calendar* year; but Python's standard library returns the ISO year as the first element,
+so any model reaching for the obvious function is correct by construction. The same holds
+for the other three families: `int(c, 36)` gets ISIN letters right, an alphabet string
+gets GSTIN digits right, and a tool handed a holiday list uses it.
+
+The honest conclusion: for these four rules the idiomatic Python solution *is* the correct
+one, so the held-out check is a net that a capable model rarely falls into. It catches a
+hand-rolled implementation — which is exactly what `uv run python -m src.smith`
+demonstrates, building a deliberately wrong GSTIN tool that passes its own tests and
+watching the held-out check reject it with only a count and a hint. **A family where the
+obvious solution is subtly wrong would exercise this gate far harder, and that is the
+clearest thing to build next.**
 
 ### Per task
 

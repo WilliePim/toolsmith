@@ -92,15 +92,18 @@ solo.
 <!-- GENERATED:sandbox:START -->
 | piattaforma | tetto memoria | attacchi | contenuti | dalla guardia | dal sandbox | limiti dichiarati | fughe non dichiarate |
 |---|---|---|---|---|---|---|---|
+| Linux | RLIMIT_AS 1 GB | 42 | 42/42 | 27 | 15 | - | none |
 | Windows | none (Windows: only the watchdog timeout) | 42 | 41/42 | 27 | 14 | memory bomb (4 GB) | none |
 <!-- GENERATED:sandbox:END -->
 
-**Un attacco non viene contenuto, ed è dichiarato invece che corretto in silenzio.** Su
-Windows una singola allocazione da 4 GB riesce: non c'è tetto allo spazio di
-indirizzamento e finisce entro il timeout del watchdog. Su Linux il sandbox imposta
-`RLIMIT_AS` e lo stesso attacco è rifiutato. La suite fallisce su qualsiasi fuga *non
-dichiarata*; un limite documentato viene riportato, così il segnale resta utile.
-Dettagli e altri limiti: [docs/it/security.md](docs/it/security.md).
+**Un attacco non viene contenuto su Windows, ed è dichiarato invece che corretto in
+silenzio.** Lì una singola allocazione da 4 GB riesce: Windows non ha un tetto allo
+spazio di indirizzamento e l'allocazione finisce entro il timeout del watchdog. La riga
+Linux non è una previsione — è la stessa suite eseguita in CI, dove `RLIMIT_AS` del
+sandbox trasforma quell'attacco in un `MemoryError` e tutti e 42 sono contenuti.
+Distribuire su Linux o in container chiude questa lacuna. La suite fallisce su qualsiasi
+fuga *non dichiarata*; un limite documentato viene riportato, così il segnale resta
+utile. Dettagli e altri limiti: [docs/it/security.md](docs/it/security.md).
 
 ## Dove sbaglia
 

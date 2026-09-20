@@ -87,13 +87,16 @@ guard on purpose**, to prove the audit hook holds alone.
 <!-- GENERATED:sandbox:START -->
 | platform | memory cap | attacks | contained | by the guard | by the sandbox | documented limits | undeclared escapes |
 |---|---|---|---|---|---|---|---|
+| Linux | RLIMIT_AS 1 GB | 42 | 42/42 | 27 | 15 | - | none |
 | Windows | none (Windows: only the watchdog timeout) | 42 | 41/42 | 27 | 14 | memory bomb (4 GB) | none |
 <!-- GENERATED:sandbox:END -->
 
-**One attack is not contained, and it is reported rather than quietly patched.** On
-Windows a single 4 GB allocation succeeds: there is no address-space cap and it finishes
-inside the watchdog's timeout. On Linux the sandbox sets `RLIMIT_AS` and the same attack
-is refused. The suite fails on any *undeclared* escape; a documented limit is reported
+**One attack is not contained on Windows, and it is reported rather than quietly
+patched.** A single 4 GB allocation succeeds there: Windows has no address-space cap and
+the allocation finishes inside the watchdog's timeout. The Linux row is not a prediction
+— it is the same suite run in CI, where the sandbox's `RLIMIT_AS` turns that attack into
+a `MemoryError` and all 42 are contained. Deploying on Linux or in a container closes
+this gap. The suite fails on any *undeclared* escape; a documented limit is reported
 instead, so the signal stays meaningful. Details and other limits:
 [docs/en/security.md](docs/en/security.md).
 

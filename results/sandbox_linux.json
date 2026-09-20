@@ -1,0 +1,519 @@
+{
+  "platform": {
+    "os": "Linux",
+    "release": "6.17.0-1022-azure",
+    "python": "3.13.15",
+    "machine": "x86_64",
+    "memory_cap": "RLIMIT_AS 1 GB"
+  },
+  "generated": "2026-09-20T12:55:38+00:00",
+  "known_limits": [],
+  "escaped": [],
+  "benign_refused": [],
+  "records": [
+    {
+      "kind": "attack",
+      "name": "import os",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import of 'os' is not allowed; allowed modul"
+    },
+    {
+      "kind": "attack",
+      "name": "import subprocess",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import of 'subprocess' is not allowed; allow"
+    },
+    {
+      "kind": "attack",
+      "name": "import socket",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import of 'socket' is not allowed; allowed m"
+    },
+    {
+      "kind": "attack",
+      "name": "from os import system",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import from 'os' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "aliased import",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import of 'os' is not allowed; allowed modul"
+    },
+    {
+      "kind": "attack",
+      "name": "importlib",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import of 'importlib' is not allowed; allowe"
+    },
+    {
+      "kind": "attack",
+      "name": "__import__",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'__import__' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "eval",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'eval' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "exec",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'exec' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "compile",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'compile' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "open",
+      "category": "read outside the allowed directory",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'open' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "getattr pivot",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'getattr' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "dunder class walk",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the attribute '__bases__' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "mro subclasses",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the attribute '__subclasses__' is not allowe"
+    },
+    {
+      "kind": "attack",
+      "name": "globals",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'globals' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "builtins via dunder",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the attribute '__dict__' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "typing.sys pivot",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the attribute 'modules' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "collections private",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the private attribute '_sys' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "frame walk",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the attribute '__traceback__' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "format traversal",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "this format string reaches into an attribute"
+    },
+    {
+      "kind": "attack",
+      "name": "format map",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "the attribute 'format_map' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "bare except swallow",
+      "category": "swallow the violation",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "import of 'os' is not allowed; allowed modul"
+    },
+    {
+      "kind": "attack",
+      "name": "except BaseException",
+      "category": "swallow the violation",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'BaseException' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "return in finally",
+      "category": "swallow the violation",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "return/break/continue in a finally block can"
+    },
+    {
+      "kind": "attack",
+      "name": "reserved prefix",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "names starting with '_TS_' are reserved"
+    },
+    {
+      "kind": "attack",
+      "name": "star import",
+      "category": "forbidden module import",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "star imports are not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "annotation eval",
+      "category": "interpreter escape",
+      "target_layer": "guard",
+      "contained": true,
+      "stopped_by": "guard",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "'eval' is not allowed"
+    },
+    {
+      "kind": "attack",
+      "name": "infinite loop",
+      "category": "infinite loop",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "watchdog: timeout"
+    },
+    {
+      "kind": "attack",
+      "name": "print flood",
+      "category": "infinite loop",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "watchdog: output cap"
+    },
+    {
+      "kind": "attack",
+      "name": "deep recursion",
+      "category": "excessive memory",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "failed call: RecursionError: maximum recursion depth "
+    },
+    {
+      "kind": "attack",
+      "name": "memory bomb (4 GB)",
+      "category": "excessive memory",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "failed call: MemoryError: "
+    },
+    {
+      "kind": "attack",
+      "name": "memory bomb (growing list)",
+      "category": "excessive memory",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "failed call: MemoryError: "
+    },
+    {
+      "kind": "attack",
+      "name": "sys.exit in run",
+      "category": "interpreter escape",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "failed call: SystemExit: 0"
+    },
+    {
+      "kind": "attack",
+      "name": "non-serialisable return",
+      "category": "other",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "failed call: TypeError: Object of type set is not JSO"
+    },
+    {
+      "kind": "attack",
+      "name": "os.system (guard skipped)",
+      "category": "process spawn",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: os.system"
+    },
+    {
+      "kind": "attack",
+      "name": "subprocess spawn (guard skipped)",
+      "category": "process spawn",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "crashed: _TS_Violation: sandbox denied: os.listdi"
+    },
+    {
+      "kind": "attack",
+      "name": "write a file (guard skipped)",
+      "category": "write to disk",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: writing pwned.txt"
+    },
+    {
+      "kind": "attack",
+      "name": "append to a file elsewhere (guard skipped)",
+      "category": "write to disk",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: writing /home/runner/wor"
+    },
+    {
+      "kind": "attack",
+      "name": "socket (guard skipped)",
+      "category": "network access",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: socket.__new__"
+    },
+    {
+      "kind": "attack",
+      "name": "dns lookup (guard skipped)",
+      "category": "network access",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: socket.gethostbyname"
+    },
+    {
+      "kind": "attack",
+      "name": "os.listdir (guard skipped)",
+      "category": "read outside the allowed directory",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: os.listdir"
+    },
+    {
+      "kind": "attack",
+      "name": "read a file outside the sandbox (guard skipped)",
+      "category": "read outside the allowed directory",
+      "target_layer": "sandbox",
+      "contained": true,
+      "stopped_by": "sandbox",
+      "known_limit": false,
+      "known_limit_reason": "",
+      "detail": "sandbox denied: reading /home/runner/wor"
+    },
+    {
+      "kind": "benign",
+      "name": "helper named json",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "kind": "benign",
+      "name": "Counter.most_common (lazy heapq)",
+      "passed": true,
+      "detail": "b"
+    },
+    {
+      "kind": "benign",
+      "name": "decimal context",
+      "passed": true,
+      "detail": "0.3333"
+    },
+    {
+      "kind": "benign",
+      "name": "class with __init__",
+      "passed": true,
+      "detail": "42"
+    },
+    {
+      "kind": "benign",
+      "name": "try/except ValueError",
+      "passed": true,
+      "detail": "42, not a number"
+    },
+    {
+      "kind": "benign",
+      "name": "date isocalendar (param shadows import)",
+      "passed": true,
+      "detail": "12"
+    },
+    {
+      "kind": "benign",
+      "name": "re and string",
+      "passed": true,
+      "detail": "True"
+    }
+  ]
+}

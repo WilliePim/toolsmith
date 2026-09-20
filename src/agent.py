@@ -117,25 +117,37 @@ class Agent:
 
     def _handle(self, calls: Sequence[ToolCall], task: Task, result: RunResult,
                 writes_left: int) -> tuple[str | None, list[ToolResult], int]:
-        """Route each tool call. Returns (answer or None, results, writes_left)."""
-        out: list[ToolResult] = []
-        for call in calls:
+        """Route each tool call. Returns (answer or None, results, writes_left).
+
+        Calls to the same generated tool are collected and run in one sandbox
+        process: the protocol already takes a batch of calls on stdin, and a
+        round with six parallel calls should not pay for six interpreters.
+        """
+        out: list[ToolResult | None] = [None] * len(calls)
+        batched: dict[str, list[int]] = {}
+
+        for index, call in enumerate(calls):
             if call.name == "submit_answer":
-                return str(call.args.get("answer", "")), out, writes_left
+                return str(call.args.get("answer", "")), _done(out), writes_left
             if call.name == "write_tool":
                 text, writes_left = self._write(call, task, result, writes_left)
-                out.append(ToolResult(call, text, is_error="registered" not in text))
+                out[index] = ToolResult(call, text, is_error="registered" not in text)
             elif call.name in self.registry:
-                out.append(self._call_generated(call, result))
+                batched.setdefault(call.name, []).append(index)
             elif call.name in tools.FIXED:
                 text = tools.call(call.name, call.args)
                 self._log(result.rounds,
                           f"{call.name}({_short(call.args)}) -> {text[:60]!r}", result)
-                out.append(ToolResult(call, text))
+                out[index] = ToolResult(call, text)
             else:
-                out.append(ToolResult(call, f"ERROR: no tool called {call.name!r}.",
-                                      is_error=True))
-        return None, out, writes_left
+                out[index] = ToolResult(call, f"ERROR: no tool called {call.name!r}.",
+                                        is_error=True)
+
+        for name, indexes in batched.items():
+            group = [calls[i] for i in indexes]
+            for index, tool_result in zip(indexes, self._call_generated(name, group, result)):
+                out[index] = tool_result
+        return None, _done(out), writes_left
 
     def _write(self, call: ToolCall, task: Task, result: RunResult,
                writes_left: int) -> tuple[str, int]:
@@ -165,16 +177,26 @@ class Agent:
             result.refusals[forged.stage] = result.refusals.get(forged.stage, 0) + 1
         return forged.message, writes_left
 
-    def _call_generated(self, call: ToolCall, result: RunResult) -> ToolResult:
-        run = self.registry.call(call.name, [call.args])
-        self.registry.record_use(call.name)
-        result.tools_used.append(call.name)
-        first = run.results[0] if run.results else {"ok": False, "error": run.detail}
-        if first.get("ok"):
-            self._log(result.rounds, f"{call.name}({_short(call.args)}) -> {first['value']!r}", result)
-            return ToolResult(call, _truncate(str(first["value"])))
-        self._log(result.rounds, f"{call.name}({_short(call.args)}) -> [red]{first.get('error')}[/]", result)
-        return ToolResult(call, f"ERROR: {first.get('error')}", is_error=True)
+    def _call_generated(self, name: str, calls: Sequence[ToolCall],
+                        result: RunResult) -> list[ToolResult]:
+        """Run one tool over every call it received this round, in a single sandbox."""
+        run = self.registry.call(name, [call.args for call in calls])
+        self.registry.record_use(name, len(calls))
+        result.tools_used.extend([name] * len(calls))
+
+        missing = {"ok": False, "error": run.detail or "no result"}
+        out: list[ToolResult] = []
+        for call, outcome in zip(calls, list(run.results) + [missing] * len(calls)):
+            if outcome.get("ok"):
+                self._log(result.rounds,
+                          f"{name}({_short(call.args)}) -> {outcome['value']!r}", result)
+                out.append(ToolResult(call, _truncate(str(outcome["value"]))))
+            else:
+                self._log(result.rounds,
+                          f"{name}({_short(call.args)}) -> [red]{outcome.get('error')}[/]",
+                          result)
+                out.append(ToolResult(call, f"ERROR: {outcome.get('error')}", is_error=True))
+        return out
 
     def _finish(self, result: RunResult, answer: str) -> RunResult:
         result.answer = answer
@@ -198,6 +220,11 @@ class Agent:
             # read back as the transcript a person actually watched.
             plain = re.sub(r"\[/?[a-z ]*\]", "", message)
             result.trace.append(f"r{round_no} {plain}")
+
+
+def _done(slots: Sequence[ToolResult | None]) -> list[ToolResult]:
+    """The results filled in so far, in the order the model asked for them."""
+    return [slot for slot in slots if slot is not None]
 
 
 def _truncate(text: str) -> str:

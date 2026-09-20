@@ -6,7 +6,7 @@
     "machine": "AMD64",
     "memory_cap": "none (Windows: only the watchdog timeout)"
   },
-  "generated": "2026-09-19T16:56:40+00:00",
+  "generated": "2026-09-20T12:50:08+00:00",
   "known_limits": [
     {
       "name": "memory bomb (4 GB)",

@@ -150,8 +150,13 @@ def summarise(runs: list[dict]) -> dict[str, Any]:
                 for r in usable if not r["correct"]]
 
     meta = usable[0]["meta"] if usable else {}
+    # When the runs happened, not when this report was rendered: re-running the
+    # report must not make yesterday's measurements look like today's.
+    started = sorted(r["meta"].get("started", "") for r in usable if r.get("meta"))
+    run_days = sorted({s[:10] for s in started if s})
     return {
         "generated": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "run_dates": run_days,
         "meta": meta,
         "totals": {
             "repeats": REPEATS,
@@ -338,12 +343,14 @@ def prompt_diff(italian: bool) -> str:
 def header_line(summary: dict, italian: bool) -> str:
     meta, totals = summary["meta"], summary["totals"]
     extra = totals.get("extra_runs_excluded", 0)
+    days = summary.get("run_dates") or [summary["generated"][:10]]
+    when = days[0] if len(days) == 1 else f"{days[0]} - {days[-1]}"
     if italian:
         note = (f" Escluse dalle medie {extra} esecuzioni fuori disegno, raccolte dopo "
                 f"per catturare una traccia." if extra else "")
         return (f"Modello **{meta.get('model', '?')}**, temperatura "
                 f"*{meta.get('temperature', '?')}*, commit `{meta.get('commit', '?')}`, "
-                f"eseguito il {summary['generated'][:10]}. "
+                f"eseguito il {when}. "
                 f"{totals['repeats']} ripetizioni per compito e condizione: "
                 f"{totals['runs']} esecuzioni, {totals['completion_tokens']:,} token in "
                 f"uscita, costo totale ${totals['cost_usd']:.2f}. "
@@ -352,7 +359,7 @@ def header_line(summary: dict, italian: bool) -> str:
             f"are excluded from every average." if extra else "")
     return (f"Model **{meta.get('model', '?')}**, temperature "
             f"*{meta.get('temperature', '?')}*, commit `{meta.get('commit', '?')}`, "
-            f"run on {summary['generated'][:10]}. "
+            f"run on {when}. "
             f"{totals['repeats']} repetitions per task per condition: "
             f"{totals['runs']} runs, {totals['completion_tokens']:,} output tokens, "
             f"${totals['cost_usd']:.2f} total. "

@@ -2,7 +2,9 @@
 
 *Italiano · [English](README.md)*
 
-Un agente che parte con due strumenti — una calcolatrice e la data di oggi — e **ne scrive un terzo quando incontra un compito che i primi due non risolvono**. Lo strumento che scrive è un normale file Python su disco; il compito successivo dello stesso tipo lo richiama invece di riscriverlo.
+Un agente che parte con la cassetta degli attrezzi di un assistente qualunque — una calcolatrice e la data di oggi — e **ne scrive un terzo quando incontra un compito che quei due non risolvono**. Lo strumento che scrive è un normale file Python su disco; il compito successivo dello stesso tipo lo richiama invece di riscriverlo.
+
+**Perché proprio quei due?** Perché sono deliberatamente *quasi* giusti. Un checksum è aritmetica e la calcolatrice c'è; un'etichetta di settimana ISO è una data e la data c'è. Entrambi i compiti sembrano alla portata, e nessuno dei due lo è: `calc` valuta una sola espressione per round. Partire da zero renderebbe banale la scelta di scrivere uno strumento; partire con lo strumento giusto non dimostrerebbe nulla. È lo scarto fra "sembra pertinente" e "risolve davvero" che rende quella scelta una decisione. La condizione *baseline* qui sotto ha esattamente quei due strumenti e nient'altro: le tabelle mostrano fin dove portano.
 
 Uno strumento scritto dal modello attraversa quattro cancelli prima di poter essere chiamato:
 
@@ -24,7 +26,7 @@ Uno strumento scritto dal modello attraversa quattro cancelli prima di poter ess
 > `uv run python -m src.bench --repeats 10 && uv run python -m src.report`.
 
 <!-- GENERATED:bench-header:START -->
-Modello **gemini-3.8-flash**, temperatura *provider default (unset)*, commit `f292c9f+dirty`, eseguito il 2026-09-19. 10 ripetizioni per compito e condizione: 160 esecuzioni, 289,046 token in uscita, costo totale $2.31. Errori del provider rilanciati: 0. Escluse dalle medie 5 esecuzioni fuori disegno, raccolte dopo per catturare una traccia.
+Modello **gemini-3.8-flash**, temperatura *provider default (unset)*, commit `f292c9f+dirty`, eseguito il 2026-09-20. 10 ripetizioni per compito e condizione: 160 esecuzioni, 289,046 token in uscita, costo totale $2.31. Errori del provider rilanciati: 0. Escluse dalle medie 5 esecuzioni fuori disegno, raccolte dopo per catturare una traccia.
 <!-- GENERATED:bench-header:END -->
 
 ## Che aspetto ha

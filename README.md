@@ -2,7 +2,9 @@
 
 *[Italiano](README.it.md) · English*
 
-An agent that starts with two tools — a calculator and today's date — and **writes a third when it meets a task the first two cannot do**. The tool it writes is an ordinary Python file on disk; the next task of the same kind calls it instead of writing it again.
+An agent that starts with the toolbox a generic assistant ships with — a calculator and today's date — and **writes a third tool when it meets a task those two cannot do**. The tool it writes is an ordinary Python file on disk; the next task of the same kind calls it instead of writing it again.
+
+**Why those two?** Because they are deliberately *almost* right. A checksum is arithmetic and there is a calculator; an ISO week label is a date and there is a date. Both tasks look within reach, and neither is: `calc` evaluates one expression per round. Starting from nothing would make "write a tool" a trivial choice; starting with the right tool would prove nothing. The gap between *looks relevant* and *actually solves it* is what turns that choice into a decision. The *baseline* condition below has exactly those two tools and nothing else — the tables show how far they get you.
 
 A tool the model writes goes through four gates before it can be called:
 
@@ -23,7 +25,7 @@ A tool the model writes goes through four gates before it can be called:
 > `uv run python -m src.bench --repeats 10 && uv run python -m src.report`.
 
 <!-- GENERATED:bench-header:START -->
-Model **gemini-3.8-flash**, temperature *provider default (unset)*, commit `f292c9f+dirty`, run on 2026-09-19. 10 repetitions per task per condition: 160 runs, 289,046 output tokens, $2.31 total. Provider errors retried: 0. 5 out-of-design runs, collected afterwards to capture a transcript, are excluded from every average.
+Model **gemini-3.8-flash**, temperature *provider default (unset)*, commit `f292c9f+dirty`, run on 2026-09-20. 10 repetitions per task per condition: 160 runs, 289,046 output tokens, $2.31 total. Provider errors retried: 0. 5 out-of-design runs, collected afterwards to capture a transcript, are excluded from every average.
 <!-- GENERATED:bench-header:END -->
 
 ## What it looks like

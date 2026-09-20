@@ -1,5 +1,9 @@
 # toolsmith
 
+[![checks](https://github.com/WilliePim/toolsmith/actions/workflows/checks.yml/badge.svg)](https://github.com/WilliePim/toolsmith/actions/workflows/checks.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
+
 *Italiano · [English](README.md)*
 
 **Un agente che scrive, verifica e riusa i propri strumenti Python — e un'impalcatura di
@@ -45,6 +49,12 @@ Modello **gemini-3.8-flash**, temperatura *provider default (unset)*, commit `f2
 > Ogni cifra in questo file è generata da `src/report.py` dai file in `results/`; nessuna
 > è scritta a mano. Si riproducono con
 > `uv run python -m src.bench --repeats 10 && uv run python -m src.report`.
+>
+> Il commit indicato sopra non è risolvibile: la cronologia è stata riscritta dopo le
+> esecuzioni, per sostituire un'email personale con l'indirizzo mascherato di GitHub. La
+> prova che sopravvive alla riscrittura sono i dati — `results/runs/` contiene tutti e
+> 160 i record, ciascuno con orario, traccia e conteggio dei token — e `+dirty` significa
+> che l'albero di lavoro aveva modifiche non committate al momento delle esecuzioni.
 
 ## Come funziona
 
@@ -132,6 +142,9 @@ r10 out of rounds
 ```
 <!-- GENERATED:bench-trace:END -->
 
+<details>
+<summary>Ogni esecuzione fallita, elencata</summary>
+
 <!-- GENERATED:bench-failures:START -->
 | run | task | condizione | cosa è successo | risposta data |
 |---|---|---|---|---|
@@ -150,6 +163,7 @@ r10 out of rounds
 | `finance__baseline__isin_1__r08` | isin_1 | baseline | unfinished | `-` |
 | `finance__baseline__isin_1__r09` | isin_1 | baseline | unfinished | `-` |
 <!-- GENERATED:bench-failures:END -->
+</details>
 
 ## Avvio rapido
 
@@ -251,8 +265,8 @@ in tutte e quattro le famiglie è l'accuratezza, non uno sconto fisso.
 <!-- GENERATED:bench-refusals:START -->
 | cancello che ha respinto uno strumento | volte |
 |---|---|
-| own_tests | 3 |
-| tests | 2 |
+| i test del modello stesso, eseguiti nel sandbox | 3 |
+| il controllo della specifica (test assenti o malformati) | 2 |
 
 45 tentativi di scrittura in totale; 5 respinti e 3 esecuzioni hanno poi registrato uno strumento riparato.
 <!-- GENERATED:bench-refusals:END -->
@@ -289,10 +303,11 @@ controllo nascosto che lo coglie rivelando solo un conteggio e un indizio.
 
 ## Cosa viene dal riferimento, e cosa è nuovo qui
 
-Il progetto segue un tutorial sulla costruzione di un agente che estende sé stesso, la cui
-seconda metà era dietro un paywall. *Riferimento: (segnaposto — da inserire).* Nulla di
-esso è riprodotto qui: né testo, né figure, né tabelle — solo una descrizione, con parole
-mie, di quali idee venissero dalla metà leggibile.
+Il progetto segue un tutorial a pagamento sulla costruzione di un agente che estende sé
+stesso, la cui seconda metà era dietro un paywall e che quindi non viene qui collegato né
+ridistribuito. Nulla di esso è riprodotto: né testo, né figure, né tabelle — solo una
+descrizione, con parole mie, di quali idee venissero dalla metà leggibile e quali siano
+state progettate per questo repository.
 
 **Dal riferimento, reimplementato:** la forma generale — ricostruire la lista degli
 strumenti dentro il ciclo dei round, dividere la sicurezza fra una lettura statica e
@@ -336,6 +351,12 @@ docs/{en,it}/           architettura, sicurezza, set di compiti, progetto, diari
 
 Ogni modulo ha un'autoverifica `__main__`: `uv run python -m src.<modulo>`.
 La CI le esegue, insieme ai due generatori e alla suite di red-team su Linux.
+
+**Se leggi solo tre file:** [`src/guard.py`](src/guard.py) per il livello AST
+default-deny e il perché di ogni regola, [`src/smith.py`](src/smith.py) per il percorso
+scrivi-controlla-registra e la regola per cui un fallimento nascosto rivela solo un
+conteggio e un indizio, e [`src/bench.py`](src/bench.py) per come le misure evitano di
+ingannare sé stesse.
 
 ## Per approfondire
 

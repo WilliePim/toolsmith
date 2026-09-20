@@ -220,6 +220,20 @@ def table_reuse(summary: dict, italian: bool) -> str:
     return "\n".join(lines)
 
 
+_STAGE_LABELS = {
+    "name": ("the tool name", "il nome dello strumento"),
+    "params": ("the parameter check", "il controllo dei parametri"),
+    "tests": ("the spec check (too few or malformed tests)",
+              "il controllo della specifica (test assenti o malformati)"),
+    "guard": ("the static guard", "la guardia statica"),
+    "own_tests": ("the model's own tests, run in the sandbox",
+                  "i test del modello stesso, eseguiti nel sandbox"),
+    "holdout": ("the held-out check", "il controllo su input nascosti"),
+    "run": ("the sandbox (the tool did not run)",
+            "il sandbox (lo strumento non è partito)"),
+}
+
+
 def table_refusals(summary: dict, italian: bool) -> str:
     """Where the four gates actually fired across every run of the tools condition."""
     stages: dict[str, int] = defaultdict(int)
@@ -238,7 +252,8 @@ def table_refusals(summary: dict, italian: bool) -> str:
             else "| cancello che ha respinto uno strumento | volte |")
     lines = [head, "|---|---|"]
     for stage, count in sorted(stages.items(), key=lambda kv: -kv[1]):
-        lines.append(f"| {stage} | {count} |")
+        label = _STAGE_LABELS.get(stage, (stage, stage))[1 if italian else 0]
+        lines.append(f"| {label} | {count} |")
     tail = (f"\n\n{written} tool-writing attempts in total; {sum(stages.values())} were "
             f"refused and {repaired} run(s) went on to register a repaired tool."
             if not italian else
